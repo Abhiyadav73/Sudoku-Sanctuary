@@ -1,0 +1,47 @@
+[
+  {
+    "tip": "Look for Naked Pairs in the central sub-grid to eliminate matching candidates from nearby cells."
+  },
+  {
+    "tip": "A Hidden Single in the top-right box can unlock the next chain of placements."
+  },
+  {
+    "tip": "Scan each row for missing digits before checking individual cells."
+  },
+  {
+    "tip": "If a number appears only once as a candidate in a column, it must belong there."
+  },
+  {
+    "tip": "Use Box-Line Reduction to remove impossible candidates from intersecting rows and columns."
+  },
+  {
+    "tip": "Check for Naked Triples in crowded rows to simplify candidate lists."
+  },
+  {
+    "tip": "The middle-left sub-grid contains a strong candidate pattern worth inspecting."
+  },
+  {
+    "tip": "When stuck, compare candidate overlaps between adjacent 3×3 boxes."
+  },
+  {
+    "tip": "A locked candidate in one box may reveal the next placement in its row."
+  },
+  {
+    "tip": "Focus on the row with the fewest empty cells for faster deductions."
+  },
+  {
+    "tip": "Hidden Pairs can reduce noise and expose new singles."
+  },
+  {
+    "tip": "Diagonal scanning sometimes reveals overlooked candidate conflicts."
+  },
+  {
+    "tip": "Look for cells with only two candidates before exploring harder strategies."
+  },
+  {
+    "tip": "An unresolved column near completion often hides an easy placement."
+  },
+  {
+    "tip": "Use candidate elimination systematically before guessing."
+  } 
+]
