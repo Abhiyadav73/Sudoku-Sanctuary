@@ -317,7 +317,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart, onSettings, onHo
         <div className="w-full bg-[#191c1e] text-white py-4 border-t border-white/10">
           <div className="flex justify-center w-full px-10 max-w-7xl mx-auto">
             <div className="text-white/80 text-xs font-body tracking-widest font-semibold text-center">
-              © {new Date().getFullYear()} Mindgames Sanctuary. All Rights Reserved.
+              © {new Date().getFullYear()} Mindgames Sanctuary.All Rights Reserved.
             </div>
           </div>
         </div>
