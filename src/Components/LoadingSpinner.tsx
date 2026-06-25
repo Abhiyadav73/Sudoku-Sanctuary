@@ -39,7 +39,7 @@ const DualArcSpinner: React.FC = () => {
           stroke={colors[2]}
           strokeWidth="6"
           strokeLinecap="round"
-          strokeDasharray="47.1 141.3" // slightly smaller arc
+          strokeDasharray="47.1 141.3"
           strokeDashoffset="0"
           style={{ filter: "blur(0.5px)" }}
           animate={{ rotate: -360, stroke: colors.slice().reverse() }}

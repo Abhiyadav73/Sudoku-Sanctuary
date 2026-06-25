@@ -14,11 +14,8 @@ export interface CellData {
   value: number | null;
   fixed: boolean;
   notes: number[];
-  /** True when this cell's value conflicts with a peer in its row, col, or box */
   error: boolean;
-  /** True when this cell is a hint-revealed cell */
   isHint?: boolean;
-  /** True when the player placed the correct value — cell becomes uneditable */
   isCorrect?: boolean;
 }
 
@@ -45,19 +42,16 @@ const difficultyData = {
 
 // ─── Peer helpers ────────────────────────────────────────────────────────────
 
-/** Returns indices of all cells in the same row as `index` */
 function rowPeers(index: number): number[] {
   const row = Math.floor(index / 9);
   return Array.from({ length: 9 }, (_, c) => row * 9 + c).filter(i => i !== index);
 }
 
-/** Returns indices of all cells in the same column as `index` */
 function colPeers(index: number): number[] {
   const col = index % 9;
   return Array.from({ length: 9 }, (_, r) => r * 9 + col).filter(i => i !== index);
 }
 
-/** Returns indices of all cells in the same 3×3 box as `index` */
 function boxPeers(index: number): number[] {
   const row = Math.floor(index / 9);
   const col = index % 9;
@@ -73,15 +67,10 @@ function boxPeers(index: number): number[] {
   return peers;
 }
 
-/** All unique peers (row + col + box) of a given cell */
 function allPeers(index: number): Set<number> {
   return new Set([...rowPeers(index), ...colPeers(index), ...boxPeers(index)]);
 }
 
-/**
- * Recomputes the `error` flag for every cell i n the board.
- * A cell has an error if its value duplicates any peer's value.
- */
 function recomputeErrors(board: CellData[]): CellData[] {
   return board.map((cell, index) => {
     if (cell.value === null) {
@@ -127,8 +116,7 @@ export function useSudoku() {
     }));
 
   // ── Auto-persist whenever board / time / mistakes change ─────────────────
-  // We use a debounce-free approach: just write on every meaningful update.
-  // This is safe because localStorage writes are synchronous and fast.
+
   const persistRef = useRef<(() => void) | null>(null);
   persistRef.current = () => {
     if (!state.isPlaying || !currentPuzzleIdRef.current) return;
@@ -146,7 +134,6 @@ export function useSudoku() {
 
   useEffect(() => {
     persistRef.current?.();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.board, state.timeElapsed, state.mistakeCount]);
 
   // ── generateBoard: internal fallback (uses random JSON puzzle) ─────────────
@@ -212,7 +199,6 @@ export function useSudoku() {
     let board: CellData[];
 
     if (snapshot && snapshot.length === 81) {
-      // Restore from saved snapshot
       board = recomputeErrors(
         snapshot.map(c => ({
           value: c.value,
@@ -224,7 +210,6 @@ export function useSudoku() {
         }))
       );
     } else {
-      // Fresh board from the puzzle string
       board = recomputeErrors(
         puzzleString.split('').map(char => {
           const val = parseInt(char, 10);
@@ -232,8 +217,7 @@ export function useSudoku() {
         })
       );
     }
-
-    // Deserialise history if provided
+    
     const history: { board: CellData[] }[] = savedHistory.map(h => ({
       board: h.board.map(c => ({
         value: c.value,
@@ -266,9 +250,6 @@ export function useSudoku() {
     // We do nothing here to avoid double-loading.
   }, []);
 
-  // Timer — runs only while playing and not paused.
-  // The effect re-runs (and the old interval is cleared) whenever isPlaying or
-  // isPaused changes, preventing stale intervals from surviving restart/end.
   useEffect(() => {
     if (!state.isPlaying || state.isPaused) return;
     const timer = window.setInterval(() => {
@@ -277,10 +258,6 @@ export function useSudoku() {
     return () => clearInterval(timer);
   }, [state.isPlaying, state.isPaused]);
 
-  /**
-   * Permanently stop the current game (used for game-over and completion).
-   * This sets isPlaying=false which causes the timer effect to clear its interval.
-   */
   const stopGame = useCallback(() => {
     setState(prev => ({ ...prev, isPlaying: false, isPaused: false }));
   }, []);
@@ -301,10 +278,9 @@ export function useSudoku() {
     setState(prev => {
       if (prev.selectedCell === null || prev.isPaused) return prev;
       const cell = prev.board[prev.selectedCell];
-      // Can't modify fixed, hint-revealed, or player-confirmed correct cells
       if (cell.fixed || cell.isHint || cell.isCorrect) return prev;
 
-      const newBoard = prev.board.map(c => ({ ...c })); // deep-ish clone
+      const newBoard = prev.board.map(c => ({ ...c }));
 
       if (prev.notesMode) {
         // ── Notes mode ──────────────────────────────────────────────────────
@@ -328,14 +304,12 @@ export function useSudoku() {
       const prevValue = target.value;
 
       if (target.value === num) {
-        // Toggle the number off — only allowed if not already confirmed correct
         target.value = null;
         target.notes = [];
         target.error = false;
       } else {
         target.value = num;
         target.notes = [];
-        // Remove this number from notes of all peers (auto-cleanup)
         [...allPeers(prev.selectedCell)].forEach(peerIdx => {
           newBoard[peerIdx] = {
             ...newBoard[peerIdx],
@@ -344,12 +318,9 @@ export function useSudoku() {
         });
       }
 
-      // Recompute errors across the whole board after the change
       const finalBoard = recomputeErrors(newBoard);
 
       const correctValue = prev.solution ? parseInt(prev.solution[prev.selectedCell], 10) : null;
-
-      // Lock the cell if the player just placed the correct value
       if (correctValue !== null && target.value === correctValue) {
         finalBoard[prev.selectedCell] = {
           ...finalBoard[prev.selectedCell],
@@ -357,8 +328,6 @@ export function useSudoku() {
         };
       }
 
-      // Count a mistake if the newly placed number doesn't match the solution
-      // and the cell wasn't already holding the same wrong value
       const isNewMistake =
         correctValue !== null &&
         target.value !== null &&
@@ -378,7 +347,6 @@ export function useSudoku() {
     setState(prev => {
       if (prev.selectedCell === null || prev.isPaused) return prev;
       const cell = prev.board[prev.selectedCell];
-      // Can't erase fixed, hint-revealed, or player-confirmed correct cells
       if (cell.fixed || cell.isHint || cell.isCorrect) return prev;
 
       const newBoard = prev.board.map(c => ({ ...c }));
@@ -421,7 +389,7 @@ export function useSudoku() {
 
       const newBoard = prev.board.map(c => ({ ...c }));
 
-      // Place the correct value as a locked hint cell
+      
       newBoard[prev.selectedCell] = {
         ...newBoard[prev.selectedCell],
         value: correctValue,
@@ -430,18 +398,11 @@ export function useSudoku() {
         isHint: true
       };
 
-      // The hint is always correct, so any peer that is:
-      //   • NOT fixed (original clue)
-      //   • NOT a hint (previously revealed)
-      //   • holding the same value  ← wrong player entry
-      // must be cleared, because the solution guarantees no duplicates.
       [...allPeers(prev.selectedCell)].forEach(peerIdx => {
         const peer = newBoard[peerIdx];
         if (!peer.fixed && !peer.isHint && peer.value === correctValue) {
-          // Evict the wrong duplicate
           newBoard[peerIdx] = { ...peer, value: null, notes: [], error: false };
         } else {
-          // Still clean up peer notes for this number
           newBoard[peerIdx] = {
             ...newBoard[peerIdx],
             notes: newBoard[peerIdx].notes.filter(n => n !== correctValue)
@@ -449,7 +410,6 @@ export function useSudoku() {
         }
       });
 
-      // Recompute errors across the whole board
       const finalBoard = recomputeErrors(newBoard);
       return {
         ...prev,
@@ -493,21 +453,11 @@ export function useSudoku() {
     return `${m}:${s}`;
   };
 
-  /**
-   * Board is complete when:
-   * - Game is active
-   * - Every cell has a value
-   * - No cell has a conflict error
-   */
   const isComplete =
     state.isPlaying &&
     state.board.every(cell => cell.value !== null) &&
     state.board.every(cell => !cell.error);
 
-  /**
-   * Returns the set of cell indices that share a row, col, or box
-   * with the currently selected cell — used by the UI for highlighting.
-   */
   const peerIndices: Set<number> =
     state.selectedCell !== null ? allPeers(state.selectedCell) : new Set();
 

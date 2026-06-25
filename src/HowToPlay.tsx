@@ -15,7 +15,6 @@ interface Props {
 export default function HowToPlay({ onClose, onShowLeaderboard, onShowStats, onShowSettings, onShowPrivacy, onShowTerms, footerBgEnabled, isDark }: Props) {
   const [activeSection, setActiveSection] = useState('basics');
 
-  // Prevent scrolling on the main page when this is open
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     return () => {

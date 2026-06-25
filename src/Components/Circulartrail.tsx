@@ -11,16 +11,16 @@ const CircularTrail: React.FC = () => {
   const [trail, setTrail] = useState<Position[]>([]);
 
   const colors: string[] = [
-    "#3B82F6", // blue
-    "#EF4444", // red
-    "#10B981", // green
-    "#FACC15", // yellow
-    "#8B5CF6", // purple
-    "#EC4899", // pink
-    "#6366F1", // indigo
+    "#3B82F6",
+    "#EF4444",
+    "#10B981",
+    "#FACC15",
+    "#8B5CF6",
+    "#EC4899",
+    "#6366F1",
   ];
 
-  const maxTrail = 20; // number of trail dots
+  const maxTrail = 20;
 
   const updateCursorPosition = (e: MouseEvent) => {
     const newPos: Position = { x: e.clientX, y: e.clientY };
@@ -29,7 +29,7 @@ const CircularTrail: React.FC = () => {
     // Add new position to trail
     setTrail((prev) => {
       const updated = [...prev, newPos];
-      if (updated.length > maxTrail) updated.shift(); // remove oldest to keep trail length
+      if (updated.length > maxTrail) updated.shift(); 
       return updated;
     });
   };
@@ -40,12 +40,12 @@ const CircularTrail: React.FC = () => {
   }, []);
 
   return (
-    <div className="fixed top-0 left-0 w-screen h-screen pointer-events-none z-[9999] overflow-hidden">
+    <div className="fixed top-0 left-0 w-screen h-screen pointer-events-none z-9999 overflow-hidden">
       <AnimatePresence>
         {trail.map((pos, index) => {
           const color = colors[index % colors.length];
-          const size = 10 + (index / maxTrail) * 20; // small to big
-          const opacity = 0.2 + (index / maxTrail) * 0.8; // fade in/out
+          const size = 10 + (index / maxTrail) * 20;
+          const opacity = 0.2 + (index / maxTrail) * 0.8;
 
           return (
             <motion.div

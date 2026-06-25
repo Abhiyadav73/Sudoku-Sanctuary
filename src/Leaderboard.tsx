@@ -160,7 +160,7 @@ export default function Leaderboard({ entries, onClose, onClear }: Props) {
 
       {selectedEntryForCard && (
         <div 
-          className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 z-110 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
           onClick={() => setSelectedEntryForCard(null)}
         >
           <div onClick={e => e.stopPropagation()}>

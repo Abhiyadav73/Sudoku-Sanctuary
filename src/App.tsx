@@ -54,11 +54,9 @@ function App() {
 
 
 
-  // Initial load effect — resume saved game or start fresh
   useEffect(() => {
-    stopGame(); // Prevent timer on Welcome screen
+    stopGame();
     const timer = setTimeout(() => {
-      // Resume where the player left off for the default 'easy' difficulty
       const { puzzle, progress } = resumeOrStartGame('easy');
       loadPuzzle(
         puzzle.puzzle,

@@ -21,11 +21,11 @@ export default function Stats({ stats, totalPlayed, totalWins, totalLosses, onCl
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-end md:items-center justify-center p-4"
+      className="fixed inset-0 z-100 flex items-end md:items-center justify-center p-4"
       style={{ background: 'rgba(25, 28, 30, 0.6)', backdropFilter: 'blur(6px)' }}
       onClick={e => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-surface-container-low w-full max-w-lg rounded-[2rem] shadow-[0_40px_80px_rgba(25,28,30,0.2)] overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="bg-surface-container-low w-full max-w-lg rounded-4xl shadow-[0_40px_80px_rgba(25,28,30,0.2)] overflow-hidden flex flex-col max-h-[90vh]">
 
         {/* Header */}
         <div className="flex items-center justify-between px-8 pt-8 pb-6 shrink-0">
@@ -72,7 +72,7 @@ export default function Stats({ stats, totalPlayed, totalWins, totalLosses, onCl
               </div>
               <div className="h-2 rounded-full bg-surface-container-highest overflow-hidden">
                 <motion.div
-                  className="h-full rounded-full bg-gradient-to-r from-primary to-primary-container"
+                  className="h-full rounded-full bg-linear-to-r from-primary to-primary-container"
                   initial={{ width: 0 }}
                   animate={{ width: `${winRate}%` }}
                   transition={{ duration: 1, ease: "easeOut" }}
