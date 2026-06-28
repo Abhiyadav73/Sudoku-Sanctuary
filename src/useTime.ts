@@ -18,9 +18,9 @@ export function useTime(overrideTimeZone?: string): TimeData {
       setTimeZone(overrideTimeZone);
       return;
     }
-
+//https://ipapi.co/json/ https://ipwho.is
     setLoading(true);
-    fetch('https://ipapi.co/json/')
+    fetch('') 
       .then((res) => res.json())
       .then((data) => {
         if (data.timezone) {

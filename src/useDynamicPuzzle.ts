@@ -171,9 +171,9 @@ function removeNumbers(
 ): number[][] {
   const attemptsMap: Record<Difficulty, number> = {
     easy:   5,
-    medium: 45,  
-    hard:   55,
-    expert: 60,
+    medium: 30,  
+    hard:   40,
+    expert: 50,
   };
   let attempts = attemptsMap[difficulty];
   const puzzle = grid.map(row => [...row]);

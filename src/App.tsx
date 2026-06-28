@@ -429,6 +429,9 @@ function App() {
         </span>
       ))}
 
+      {/*Routes*/}
+      
+
       {/* ── Modals ── */}
       <AnimatePresence mode="wait">
         {showHowToPlay && (
@@ -576,7 +579,7 @@ function App() {
             {/* Celebration header / Winner Card */}
             <div className="overflow-y-auto scrollbar-hide flex-1 flex flex-col items-center pt-8 pb-2 bg-linear-to-br from-surface-container-low to-surface-container-lowest">
               <h2 className="text-2xl font-extrabold text-on-surface font-headline mb-2">Puzzle Solved! 🎉</h2>
-              <div className="scale-90 sm:scale-100 origin-top">
+              <div className="w-full"> 
                 <WinnerCard
                   name={playerName || "Your Name"}
                   score={pointsActive ? finalScore : 0}

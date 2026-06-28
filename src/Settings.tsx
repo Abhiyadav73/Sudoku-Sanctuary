@@ -45,15 +45,15 @@ export default function Settings({ theme, onThemeChange, mistakeLimitEnabled, on
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-end md:items-center justify-center p-4"
+      className="fixed inset-0 z-100 flex items-end md:items-center justify-center p-4"
       style={{ background: 'rgba(25, 28, 30, 0.6)', backdropFilter: 'blur(6px)' }}
       onClick={e => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-surface-container-low w-full max-w-md rounded-[2rem] shadow-[0_40px_80px_rgba(25,28,30,0.2)] overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="bg-surface-container-low w-full max-w-md rounded-4xl shadow-[0_40px_80px_rgba(25,28,30,0.2)] overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="flex items-center justify-between px-8 pt-8 pb-6 shrink-0">
           <div className="flex items-center justify-center gap-2">
-            <span className="material-symbols-outlined text-on-surface leading-none translate-y-[1px] hover:rotate-90">settings</span>
+            <span className="material-symbols-outlined text-on-surface leading-none translate-y-px hover:rotate-90">settings</span>
             <h2 className="text-xl font-extrabold text-on-surface font-headline tracking-tight leading-none">Settings</h2> 
           </div>
           <button

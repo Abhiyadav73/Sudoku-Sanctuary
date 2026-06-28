@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import Typed from 'typed.js';
 import AnimatedDivider from './Components/AnimatedDivider';
 
 interface WelcomeScreenProps {
@@ -65,6 +66,19 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart, onSettings, onHo
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" aria-hidden="true" fill="currentColor" className="w-5 h-5 shrink-0"><path d="M434.8 54.1C446.7 62.7 451.1 78.3 445.7 91.9L367.3 288L512 288C525.5 288 537.5 296.4 542.1 309.1C546.7 321.8 542.8 336 532.5 344.6L244.5 584.6C233.2 594 217.1 594.5 205.2 585.9C193.3 577.3 188.9 561.7 194.3 548.1L272.7 352L128 352C114.5 352 102.5 343.6 97.9 330.9C93.3 318.2 97.2 304 107.5 295.4L395.5 55.4C406.8 46 422.9 45.5 434.8 54.1z"/></svg> 
     )
   }
+
+  useEffect(() => {
+    const typed = new Typed('#typed', {
+      strings: ["Fun","Brain Storm","Engaging","Challenging"],
+      typeSpeed: 40,
+      backSpeed: 30,
+      smartBackspace: true,
+      loop: true,
+      cursorChar: '!' 
+    });
+    
+     return () => typed.destroy();
+   }, []);
 
   return (
     <div className="bg-background text-on-surface selection:bg-primary-container selection:text-on-primary-container overflow-x-hidden font-body" ref={containerRef}>
@@ -153,8 +167,8 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart, onSettings, onHo
             <span className="animate-fade-up inline-flex items-center gap-1 px-4 py-1.5 rounded-full bg-secondary-container text-on-secondary-container text-label-md font-medium tracking-wide mb-6 hover:scale-105 transition-all duration-300"> 
               A Pure Logic Experience {powerSvg()} 
             </span>
-            <h1 className="animate-fade-up font-headline text-6xl md:text-8xl font-black text-on-surface tracking-tighter leading-[1.1] mb-8">
-              Play with <span className="text-primary">Fun</span>
+            <h1 className="animate-fade-up font-headline text-5xl sm:text-6xl md:text-8xl font-black text-on-surface tracking-tighter leading-[1.1] mb-8 flex flex-col">
+              <span>Play with</span> <span className='flex items-center lg:justify-start justify-center gap-1'> <span className="text-primary" id="typed">Fun</span> </span>
             </h1>
             <p className="animate-fade-up text-on-surface-variant text-xl md:text-2xl leading-relaxed max-w-xl mb-12 font-body font-normal">
               Find your flow in the mathematical sanctuary. An editorial-grade puzzle experience designed for deep focus and cognitive serenity.

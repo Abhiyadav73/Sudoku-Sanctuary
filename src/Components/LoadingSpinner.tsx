@@ -1,11 +1,19 @@
 // DualArcSpinner.tsx
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
 const colors = ["#ff4d6d", "#ffa64d", "#fffa4d", "#4dff9e", "#854dffff", "#a84dff"];
 const LoadingMessages: string[] = ["Getting Started", "Generating Board", "Populating Grid", "Almost There...", "Enjoy the game", "Dhrundhar...!!","You are not ready for this!!!","You are still not ready for this!!!"];
 
 const DualArcSpinner: React.FC = () => {
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    const randomMessage =
+      LoadingMessages[Math.floor(Math.random() * LoadingMessages.length)];
+
+    setMessage(randomMessage);
+  }, []);
   return (
     <div className="fixed inset-0 z-9999 flex items-center justify-center bg-surface/80 backdrop-blur-md flex-col">
       <motion.svg width="120" height="120" viewBox="0 0 100 100">
@@ -51,7 +59,7 @@ const DualArcSpinner: React.FC = () => {
           }}
         />
       </motion.svg>
-      <p className="text-[#9FA1FF] text-xl font-bold mt-4 animate-pulseColor bigbesty">{LoadingMessages[Math.floor(Math.random() * LoadingMessages.length)]}</p>  
+      <p className="text-[#9FA1FF] text-xl font-bold mt-4 animate-pulseColor bigbesty">{message}</p>  
     </div>
   );
 };
