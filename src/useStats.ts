@@ -70,5 +70,11 @@ export function useStats() {
   const totalWins   = Object.values(stats).reduce((s, d) => s + d.wins,   0);
   const totalLosses = Object.values(stats).reduce((s, d) => s + d.losses, 0);
 
-  return { stats, recordWin, recordLoss, totalPlayed, totalWins, totalLosses };
+  const clearStats = useCallback(() => {
+    const fresh: StatsData = { easy: defaultDiff(), medium: defaultDiff(), hard: defaultDiff(), expert: defaultDiff() };
+    writeStats(fresh);
+    setStats(fresh);
+  }, []);
+
+  return { stats, recordWin, recordLoss, totalPlayed, totalWins, totalLosses, clearStats };
 }

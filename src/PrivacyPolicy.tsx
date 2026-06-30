@@ -8,12 +8,12 @@ interface Props {
   onShowStats: () => void;
   onShowSettings: () => void;
   onShowTerms: () => void;
+  onShowPrivacy: () => void;
   footerBgEnabled?: boolean;
   isDark?: boolean;
 }
 
-export default function PrivacyPolicy({ onClose, onShowHowToPlay, onShowStats, onShowSettings, onShowTerms, footerBgEnabled, isDark }: Props) {
-  // Prevent scrolling on the main page when this is open
+export default function PrivacyPolicy({ onClose, onShowHowToPlay, onShowStats, onShowSettings, onShowTerms,onShowPrivacy, footerBgEnabled, isDark }: Props) {
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     return () => {
@@ -212,7 +212,7 @@ export default function PrivacyPolicy({ onClose, onShowHowToPlay, onShowStats, o
               </p>
             </div>
             <div className="flex gap-8 items-center text-sm">
-              <button onClick={() => {}} className="text-primary font-medium tracking-wide cursor-pointer">Privacy Policy</button>
+              <button onClick={onShowPrivacy} className="text-primary font-medium tracking-wide cursor-pointer">Privacy Policy</button>
               <button onClick={onShowTerms} className="text-on-surface-variant hover:text-primary transition-all font-medium tracking-wide cursor-pointer">Terms of Service</button>
             </div>
           </div>

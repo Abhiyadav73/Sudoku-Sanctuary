@@ -17,6 +17,7 @@ import WinnerCard from './Components/WinnerCard';
 import WelcomeScreen from './WelcomeScreen';
 import PrivacyPolicy from './PrivacyPolicy';
 import TermsOfService from './TermsOfService';
+import DailyChallenges from './DailyChallenges';
 import { AnimatePresence } from "framer-motion";
 import PageTransition from "./Components/PageTransition";
 import tips from '../tips.json';
@@ -51,8 +52,8 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [hasStarted, setHasStarted] = useState(false);
   const [randomTip, _] = useState(tips[Math.floor(Math.random() * tips.length)]);
-
-
+  //const [resetCount, setResetCount] = useState(0)
+  //const [hintUsed, setHintUsed] = useState(0)
 
   useEffect(() => {
     stopGame();
@@ -94,14 +95,14 @@ function App() {
   } = usePointSystem(state.difficulty, mistakeLimitEnabled);
 
   const { entries, addEntry, clearLeaderboard, currentStreak } = useLeaderboard();
-  const { stats, recordWin, recordLoss, totalPlayed, totalWins, totalLosses } = useStats();
+  const { stats, recordWin, recordLoss, totalPlayed, totalWins, totalLosses, clearStats } = useStats();
   const localUser = useTime();
-  
+
   const handleRestart = () => {
     restartPuzzle();
     resetPoints();
   };
-   
+
 
 
   // ── Trail / border settings ────────────────────────────────────────────────
@@ -197,6 +198,7 @@ function App() {
   const [showPrivacy, setShowPrivacy] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
   const [showGameOver, setShowGameOver] = useState(false);
+  const [showDaily, setShowDaily] = useState(false);
   const gameOverHandled = useRef(false);
 
   // Completion flow
@@ -205,6 +207,7 @@ function App() {
   const [playerName, setPlayerName] = useState('');
   const completionHandled = useRef(false);
   const nameInputRef = useRef<HTMLInputElement>(null);
+  const [showCasualCongrats, setShowCasualCongrats] = useState(false);
 
 
   // ── Fullscreen state ───────────────────────────────────────────────────────
@@ -267,7 +270,6 @@ function App() {
     setIsLoading(true);
     setTimeout(() => {
       const puzzle = getDailyChallenge();
-      // Daily challenge always starts fresh (no resume) but keeps same puzzle all day
       loadPuzzle(puzzle.puzzle, puzzle.solution, puzzle.difficulty, puzzle.id);
       setIsLoading(false);
     }, 600);
@@ -283,14 +285,28 @@ function App() {
       const fs = calculateFinalScore(state.timeElapsed);
       setFinalScore(fs);
 
-      setTimeout(() => {
-        setIsLoading(true);
+      if (!mistakeLimitEnabled) {
+        // Casual mode (no mistake system): simple congrats, record win, auto-start new game
+        recordWin(state.difficulty);
+        clearGameProgress(state.difficulty);
         setTimeout(() => {
-          setIsLoading(false);
-          setShowCompletionModal(true);
-          setTimeout(() => nameInputRef.current?.focus(), 100);
-        }, 800);
-      }, 400);
+          setIsLoading(true);
+          setTimeout(() => {
+            setIsLoading(false);
+            setShowCasualCongrats(true);
+          }, 800);
+        }, 400);
+      } else {
+        // Point system mode: show full completion modal with WinnerCard
+        setTimeout(() => {
+          setIsLoading(true);
+          setTimeout(() => {
+            setIsLoading(false);
+            setShowCompletionModal(true);
+            setTimeout(() => nameInputRef.current?.focus(), 100);
+          }, 800);
+        }, 400);
+      }
     }
     if (!isComplete) {
       completionHandled.current = false;
@@ -331,8 +347,6 @@ function App() {
     handleGenerateBoard(diff);
   };
 
-  // (point registration is done inline in the number-pad onClick and keyboard handler)
-
   // ── Helper for Point Animation ─────────────────────────────────────────────
   const getCellCenter = (index: number | null) => {
     if (index === null) return undefined;
@@ -355,10 +369,13 @@ function App() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (showCompletionModal || showLeaderboard || showSettings || showHowToPlay || state.isPaused) return;
       if (e.key >= '1' && e.key <= '9') {
+        const num = parseInt(e.key, 10);
+        // Skip if this number is fully placed on the board
+        const numCount = state.board.filter(cell => cell.value === num).length;
+        if (numCount >= 9) return;
         // Keyboard input — register point action using approximate position
         if (state.selectedCell !== null && state.solution && !state.notesMode) {
           const correctVal = parseInt(state.solution[state.selectedCell], 10);
-          const num = parseInt(e.key, 10);
           const currentVal = state.board[state.selectedCell].value;
           if (num !== currentVal) {
             if (num === correctVal) {
@@ -370,7 +387,7 @@ function App() {
             }
           }
         }
-        inputNumber(parseInt(e.key, 10));
+        inputNumber(num);
       } else if (e.key === 'Backspace' || e.key === 'Delete') {
         erase();
       } else if (e.key === 'n' || e.key === 'N') {
@@ -430,7 +447,7 @@ function App() {
       ))}
 
       {/*Routes*/}
-      
+
 
       {/* ── Modals ── */}
       <AnimatePresence mode="wait">
@@ -456,6 +473,22 @@ function App() {
               onShowStats={() => { setShowPrivacy(false); setShowStats(true); }}
               onShowSettings={() => { setShowPrivacy(false); setShowSettings(true); }}
               onShowTerms={() => { setShowPrivacy(false); setShowTerms(true); }}
+              onShowPrivacy={() => { setShowPrivacy(false); setShowPrivacy(true); }}
+              footerBgEnabled={footerBgEnabled}
+              isDark={isDark}
+            />
+          </PageTransition>
+        )}
+
+        {showDaily && (
+          <PageTransition className="fixed inset-0 z-100">
+            <DailyChallenges
+              onClose={() => setShowDaily(false)}
+              onShowHowToPlay={() => { setShowDaily(false); setShowHowToPlay(true); }}
+              onShowStats={() => { setShowDaily(false); setShowStats(true); }}
+              onShowSettings={() => { setShowDaily(false); setShowSettings(true); }}
+              onShowPrivacy={() => { setShowDaily(false); setShowPrivacy(true); }}
+              onShowTerms={() => { setShowDaily(false); setShowTerms(true); }}
               footerBgEnabled={footerBgEnabled}
               isDark={isDark}
             />
@@ -468,21 +501,25 @@ function App() {
               onShowHowToPlay={() => { setShowTerms(false); setShowHowToPlay(true); }}
               onShowStats={() => { setShowTerms(false); setShowStats(true); }}
               onShowSettings={() => { setShowTerms(false); setShowSettings(true); }}
+              onShowTerms={() => { setShowTerms(false); setShowTerms(true); }}
               onShowPrivacy={() => { setShowTerms(false); setShowPrivacy(true); }}
               footerBgEnabled={footerBgEnabled}
               isDark={isDark}
             />
           </PageTransition>
         )}
-      </AnimatePresence>
-      {showLeaderboard && (
-        <Leaderboard
-          entries={entries}
-          onClose={() => setShowLeaderboard(false)}
-          onClear={clearLeaderboard}
-        />
-      )}
+
+        {showLeaderboard && (
+          <PageTransition className="fixed inset-0 z-100">
+            <Leaderboard
+              entries={entries}
+              onClose={() => setShowLeaderboard(false)}
+              onClear={clearLeaderboard}
+            />
+          </PageTransition>
+        )}
       {showSettings && (
+        <PageTransition className="fixed inset-0 z-100">
         <Settings
           theme={theme}
           onThemeChange={setTheme}
@@ -506,7 +543,9 @@ function App() {
           onMusicEnabledChange={handleMusicEnabledChange}
           onClose={() => setShowSettings(false)}
         />
+        </PageTransition>
       )}
+      </AnimatePresence>
       {showStats && (
         <Stats
           stats={stats}
@@ -514,6 +553,7 @@ function App() {
           totalWins={totalWins}
           totalLosses={totalLosses}
           onClose={() => setShowStats(false)}
+          onClear={clearStats}
         />
       )}
 
@@ -579,7 +619,7 @@ function App() {
             {/* Celebration header / Winner Card */}
             <div className="overflow-y-auto scrollbar-hide flex-1 flex flex-col items-center pt-8 pb-2 bg-linear-to-br from-surface-container-low to-surface-container-lowest">
               <h2 className="text-2xl font-extrabold text-on-surface font-headline mb-2">Puzzle Solved! 🎉</h2>
-              <div className="w-full"> 
+              <div className="w-full">
                 <WinnerCard
                   name={playerName || "Your Name"}
                   score={pointsActive ? finalScore : 0}
@@ -605,7 +645,14 @@ function App() {
               />
               <div className="flex gap-3 mt-4">
                 <button
-                  onClick={() => { setShowCompletionModal(false); setPlayerName(''); }}
+                  onClick={() => {
+                    // Skip: record win, clear progress, close modal, start new game
+                    recordWin(state.difficulty);
+                    clearGameProgress(state.difficulty);
+                    setShowCompletionModal(false);
+                    setPlayerName('');
+                    handleGenerateBoard(state.difficulty);
+                  }}
                   className="flex-1 py-3 rounded-xl font-label font-bold text-sm text-on-surface-variant border border-outline-variant/30 hover:bg-surface-container-highest transition-all duration-300"
                 >
                   Skip
@@ -618,7 +665,7 @@ function App() {
                 </button>
               </div>
               <button
-                onClick={() => { setShowCompletionModal(false); setPlayerName(''); handleGenerateBoard(state.difficulty); }}
+                onClick={() => { recordWin(state.difficulty); clearGameProgress(state.difficulty); setShowCompletionModal(false); setPlayerName(''); handleGenerateBoard(state.difficulty); }}
                 className="w-full mt-3 py-3 rounded-xl font-label font-bold text-sm text-primary hover:bg-primary/5 transition-all duration-300"
               >
                 Play Again
@@ -627,6 +674,39 @@ function App() {
           </div>
         </div>
       )}
+
+      {/* ── Casual Congrats modal (no-mistake mode) ── */}
+      {showCasualCongrats && (
+        <div
+          className="fixed inset-0 z-100 flex items-center justify-center p-4"
+          style={{ background: 'rgba(25,28,30,0.7)', backdropFilter: 'blur(8px)' }}
+        >
+          <div className="bg-surface-container-low w-full max-w-sm rounded-4xl shadow-[0_40px_80px_rgba(25,28,30,0.25)] overflow-hidden text-center">
+            <div className="bg-linear-to-br from-emerald-600 to-emerald-400 px-8 pt-10 pb-8">
+              <span className="text-6xl mb-3 block">🎉</span>
+              <h2 className="text-2xl font-extrabold text-white font-headline">Congratulations!</h2>
+              <p className="text-white/80 font-label text-sm mt-2">
+                {state.difficulty.toUpperCase()} · {formatTime(state.timeElapsed)}
+              </p>
+            </div>
+            <div className="px-8 py-8 flex flex-col gap-3">
+              <p className="text-sm font-label text-on-surface-variant mb-2">
+                You solved it flawlessly! No mistakes at all.
+              </p>
+              <button
+                onClick={() => {
+                  setShowCasualCongrats(false);
+                  handleGenerateBoard(state.difficulty);
+                }}
+                className="w-full py-3.5 rounded-xl font-label font-bold text-sm bg-linear-to-r from-primary to-primary-container text-on-primary shadow-[0_8px_16px_rgba(53,37,205,0.25)] hover:shadow-[0_12px_24px_rgba(53,37,205,0.35)] active:scale-95 transition-all duration-300 cursor-pointer"
+              >
+                New Game
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
 
       {!hasStarted ? (
         <WelcomeScreen
@@ -710,6 +790,11 @@ function App() {
                 >
                   settings
                 </button>
+                <div className=" hidden  flex-col items-center">
+                  <span className="text-lg font-bold text-primary">
+                    🔥 {currentStreak}
+                  </span>
+                </div>
 
                 {/*<button
                   onClick={toggleFullScreen}
@@ -796,13 +881,13 @@ function App() {
                   className="text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface font-label px-4 py-3 flex items-center gap-3 font-medium rounded-xl transition-all duration-300"
                 >
                   <span className="material-symbols-outlined">refresh</span>
-                  Restart
+                  Reset
                 </button>
               </div>
 
               <button onClick={handleHint} className="mt-4 bg-linear-to-r from-primary to-primary-container text-on-primary py-4 rounded-full font-label font-bold tracking-wider uppercase text-sm flex items-center justify-center gap-2 shadow-[0_8px_16px_rgba(53,37,205,0.2)] hover:shadow-[0_12px_24px_rgba(53,37,205,0.3)] active:scale-95 transition-all duration-300">
                 <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>lightbulb</span>
-                Hint 
+                Hint
               </button>
             </aside>
 
@@ -999,36 +1084,64 @@ function App() {
 
               {/* Number Input */}
               <div className="w-full max-w-[600px] grid grid-cols-9 gap-1 sm:gap-3 mt-6 sm:mt-10 ">
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
-                  <button
-                    key={num}
-                    onClick={e => {
-                      // Register point action BEFORE dispatching to useSudoku so we
-                      // can read the pre-change board state accurately.
-                      if (state.selectedCell !== null && state.solution && !state.notesMode) {
-                        const correctVal = parseInt(state.solution[state.selectedCell], 10);
-                        const currentVal = state.board[state.selectedCell].value;
-                        // Only act when placing a new value (toggling same value off = no action)
-                        if (num !== currentVal) {
-                          if (num === correctVal) {
-                            // registerAction updates score +15 AND shows the floating label
-                            registerAction('correct_cell', getCellCenter(state.selectedCell) || { x: e.clientX, y: e.clientY });
-                            cellNumFillSound();
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => {
+                  // Count how many times this number appears on the board
+                  const count = state.board.filter(cell => cell.value === num).length;
+                  const isFullyPlaced = count >= 9;
 
-                          } else {
-                            // Wrong placement — no animation, score unchanged, but mistake tracked
-                            registerAction('mistake');
-                            cellNumWrongSound();
+                  return (
+                    <button
+                      key={num}
+                      disabled={isFullyPlaced}
+                      onClick={e => {
+                        if (isFullyPlaced) return;
+                        // Register point action BEFORE dispatching to useSudoku so we
+                        // can read the pre-change board state accurately.
+                        if (state.selectedCell !== null && state.solution && !state.notesMode) {
+                          const correctVal = parseInt(state.solution[state.selectedCell], 10);
+                          const currentVal = state.board[state.selectedCell].value;
+                          // Only act when placing a new value (toggling same value off = no action)
+                          if (num !== currentVal) {
+                            if (num === correctVal) {
+                              // registerAction updates score +15 AND shows the floating label
+                              registerAction('correct_cell', getCellCenter(state.selectedCell) || { x: e.clientX, y: e.clientY });
+                              cellNumFillSound();
+
+                            } else {
+                              // Wrong placement — no animation, score unchanged, but mistake tracked
+                              registerAction('mistake');
+                              cellNumWrongSound();
+                            }
                           }
                         }
-                      }
-                      inputNumber(num);
-                    }}
-                    className="aspect-square sm:h-14 flex items-center justify-center bg-surface-container-high text-on-surface-variant font-headline text-lg sm:text-xl font-medium rounded-lg sm:rounded-xl hover:bg-surface-container-highest transition-all duration-300 active:scale-90 border-[0.5px] sm:border-2 border-primary/20"
-                  >
-                    {num}
-                  </button>
-                ))}
+                        inputNumber(num);
+                      }}
+                      className={`aspect-square sm:h-14 flex items-center justify-center font-headline text-lg sm:text-xl font-medium rounded-lg sm:rounded-xl transition-all duration-300 border-[0.5px] sm:border-2 ${isFullyPlaced
+                        ? 'bg-surface-container-highest/50 text-on-surface-variant/30 border-transparent cursor-default'
+                        : 'bg-surface-container-high text-on-surface-variant border-primary/20 hover:bg-surface-container-highest active:scale-90'
+                        }`}
+                    >
+                      {isFullyPlaced ? (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-40">
+                          <path d="m10 20-1.25-2.5L6 18" />
+                          <path d="M10 4 8.75 6.5 6 6" />
+                          <path d="m14 20 1.25-2.5L18 18" />
+                          <path d="m14 4 1.25 2.5L18 6" />
+                          <path d="m17 21-3-6h-4" />
+                          <path d="m17 3-3 6 1.5 3" />
+                          <path d="M2 12h6.5L10 9" />
+                          <path d="m20 10-1.5 2 1.5 2" />
+                          <path d="M22 12h-6.5L14 15" />
+                          <path d="m4 10 1.5 2L4 14" />
+                          <path d="m7 21 3-6-1.5-3" />
+                          <path d="m7 3 3 6h4" />
+                        </svg>
+                      ) : (
+                        num
+                      )}
+                    </button>
+                  );
+                })}
               </div>
 
               {/* Architectural Tip (Responsive View) */}
@@ -1047,7 +1160,7 @@ function App() {
                 {/*<h4 className="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-4">Daily Challenge</h4>*/}
                 <button
                   onClick={handleDailyChallenge}
-                  className="w-full py-3  bg-surface-container-lowest text-primary border border-outline-variant/20 rounded-xl font-label font-bold text-sm tracking-wider uppercase hover:bg-surface-container-highest transition-colors"
+                  className=" w-full py-3  bg-surface-container-lowest text-primary border border-outline-variant/20 rounded-xl font-label font-bold text-sm tracking-wider uppercase hover:bg-surface-container-highest transition-colors"
                 >
                   Daily Challenge
                 </button>
@@ -1185,9 +1298,9 @@ function App() {
           {mobileNavEnabled && (
             <nav className="md  fixed bottom-0 left-0 right-0 bg-surface-container-highest/90 backdrop-blur-md px-3 py-3 flex justify-around items-center z-50 rounded-t-[5px] shadow-[0_-20px_40px_rgba(25,28,30,0.06)]">
 
-              <button className="flex flex-col items-center gap-1 text-primary">
-                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>grid_view</span>
-                <span className="font-label text-[10px] font-bold uppercase tracking-wider">Play</span>
+              <button onClick={() => setShowDaily(true)} className="flex flex-col items-center gap-1 text-primary">
+                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>calendar_today</span>
+                <span className="font-label text-[10px] font-bold uppercase tracking-wider">Daily</span>
               </button>
               <button
                 onClick={() => setShowHowToPlay(true)}
@@ -1196,11 +1309,20 @@ function App() {
                 <span className="material-symbols-outlined">help</span>
                 <span className="font-label text-[10px] font-bold uppercase tracking-wider">How To</span>
               </button>
+
+              <button
+                onClick={handleDailyChallenge}
+                className="flex flex-col items-center gap-1 text-on-surface-variant hover:text-primary transition-colors"
+              >
+                <span className="material-symbols-outlined">bolt</span>
+                <span className="text-[10px] font-bold uppercase">Daily</span>
+              </button>
+
               <button
                 onClick={() => setShowStats(true)}
                 className="flex flex-col items-center gap-1 text-on-surface-variant hover:text-primary transition-colors"
               >
-                <span className="material-symbols-outlined">analytics</span>
+                <span className="material-symbols-outlined">insights</span>
                 <span className="font-label text-[10px] font-bold uppercase tracking-wider">Stats</span>
               </button>
               <button

@@ -1,5 +1,6 @@
 import type { StatsData } from './useStats';
 import { motion } from 'framer-motion';
+import { useState } from 'react';
 
 interface Props {
   stats: StatsData;
@@ -7,6 +8,7 @@ interface Props {
   totalWins: number;
   totalLosses: number;
   onClose: () => void;
+  onClear: () => void;
 }
 
 const DIFFICULTY_CONFIG = [
@@ -16,8 +18,9 @@ const DIFFICULTY_CONFIG = [
   { key: 'expert' as const, label: 'Expert',  color: '#a855f7', bg: 'bg-purple-500' },
 ];
 
-export default function Stats({ stats, totalPlayed, totalWins, totalLosses, onClose }: Props) {
+export default function Stats({ stats, totalPlayed, totalWins, totalLosses, onClose, onClear }: Props) {
   const winRate = totalPlayed > 0 ? Math.round((totalWins / totalPlayed) * 100) : 0;
+  const [confirmClear, setConfirmClear] = useState(false);
 
   return (
     <div
@@ -33,12 +36,31 @@ export default function Stats({ stats, totalPlayed, totalWins, totalLosses, onCl
             <h2 className="text-xl font-extrabold text-on-surface font-headline tracking-tight">Statistics</h2>
             <p className="text-xs text-on-surface-variant font-label mt-1 uppercase tracking-widest">Your performance</p>
           </div>
-          <button
-            onClick={onClose}
-            className="material-symbols-outlined text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest p-2 rounded-full transition-all duration-300"
-          >
-            close
-          </button>
+          <div className="flex items-center gap-1">
+            {/* Clean Stats Button */}
+            {!confirmClear ? (
+              <button
+                onClick={() => setConfirmClear(true)}
+                className="material-symbols-outlined text-on-surface-variant hover:text-red-500 hover:bg-red-500/10 p-2 rounded-full transition-all duration-300"
+                title="Clear all stats"
+              >
+                delete_sweep
+              </button>
+            ) : (
+              <button
+                onClick={() => { onClear(); setConfirmClear(false); }}
+                className="text-xs font-label font-bold text-red-500 bg-red-500/10 hover:bg-red-500/20 px-3 py-2 rounded-full transition-all duration-300 animate-pulse"
+              >
+                Confirm Clear?
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className="material-symbols-outlined text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest p-2 rounded-full transition-all duration-300"
+            >
+              close
+            </button>
+          </div>
         </div>
 
         {/* Scrollable Content */}
