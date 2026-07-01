@@ -1,4 +1,6 @@
 
+
+
 interface Props {
   onClose: () => void;
   onShowHowToPlay: () => void;

@@ -233,6 +233,10 @@
   transition: width 0.3s ease;
 }
 
+.nav-link-underline:hover::after {
+  width: 100%;
+}
+
 /*Gradient border*/
 /*.card{
   margin: 0 auto;

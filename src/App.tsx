@@ -1157,7 +1157,6 @@ function App() {
             {/* ── Right: Progress & Tips ── */}
             <aside className="hidden xl:flex flex-col gap-6 w-72 h-fit">
               <div className="bg-surface-container-low p-6 rounded-4xl">
-                {/*<h4 className="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-4">Daily Challenge</h4>*/}
                 <button
                   onClick={handleDailyChallenge}
                   className=" w-full py-3  bg-surface-container-lowest text-primary border border-outline-variant/20 rounded-xl font-label font-bold text-sm tracking-wider uppercase hover:bg-surface-container-highest transition-colors"
@@ -1181,7 +1180,7 @@ function App() {
                   className="w-full py-3 bg-surface-container-lowest text-primary border border-outline-variant/20 rounded-xl font-label font-bold text-sm tracking-wider uppercase hover:bg-surface-container-highest transition-colors"
                 >
                   View Leaderboard
-                </button>
+                </button> 
               </div>
 
               <div className="bg-secondary-fixed p-6 rounded-2xl">
