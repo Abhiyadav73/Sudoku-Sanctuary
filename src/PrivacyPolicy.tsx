@@ -38,11 +38,11 @@ export default function PrivacyPolicy({ onClose, onShowHowToPlay, onShowStats, o
           <div className="flex items-center gap-4">
             <nav className="hidden md:flex items-center gap-8 mr-4">
               <button onClick={onClose} className="nav-link-underline text-on-surface-variant font-label text-sm hover:text-primary transition-colors duration-300 cursor-pointer"><span className='titillium-web-regular text-lg font-semibold'>Play</span></button>
-              <button onClick={() => { onClose(); onShowStats(); }} className="nav-link-underline text-on-surface-variant font-label text-sm  hover:text-primary transition-colors duration-300 cursor-pointer"><span className='titillium-web-regular text-lg font-semibold'>Stats</span></button>
-              <button onClick={() => { onClose(); onShowHowToPlay(); }} className="nav-link-underline text-on-surface-variant font-label text-sm hover:text-primary transition-colors duration-300 cursor-pointer"><span className='titillium-web-regular text-lg font-semibold'>How to Play</span></button>
+              <button onClick={onShowStats} className="nav-link-underline text-on-surface-variant font-label text-sm  hover:text-primary transition-colors duration-300 cursor-pointer"><span className='titillium-web-regular text-lg font-semibold'>Stats</span></button>
+              <button onClick={onShowHowToPlay} className="nav-link-underline text-on-surface-variant font-label text-sm hover:text-primary transition-colors duration-300 cursor-pointer"><span className='titillium-web-regular text-lg font-semibold'>How to Play</span></button>
             </nav>
             <button 
-              onClick={() => { onClose(); onShowSettings(); }} 
+              onClick={onShowSettings} 
               className="material-symbols-outlined text-on-surface-variant hover:text-primary hover:bg-surface-container-highest p-2.5 rounded-full transition-all duration-300 scale-95 active:scale-90 hover:rotate-90 cursor-pointer"
             >
               settings

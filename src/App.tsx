@@ -27,7 +27,10 @@ import {
   startNewGame,
   getDailyChallenge,
   clearGameProgress,
+  isDailyChallengeCompleted,
+  markDailyChallengeCompleted,
 } from './useDynamicPuzzle';
+import React from 'react';
 
 function App() {
   const {
@@ -265,8 +268,15 @@ function App() {
   };
 
   // ── Daily Challenge ───────────────────────────────────────────────────────
+  // Whether the currently active puzzle was started as a daily challenge
+  const isDailyPlayingRef = React.useRef(false);
+  const [dailyChallengeCompleted, setDailyChallengeCompleted] = useState<boolean>(
+    () => isDailyChallengeCompleted()
+  );
+
   const handleDailyChallenge = () => {
     resetPoints();
+    isDailyPlayingRef.current = true;
     setIsLoading(true);
     setTimeout(() => {
       const puzzle = getDailyChallenge();
@@ -286,8 +296,13 @@ function App() {
       setFinalScore(fs);
 
       if (!mistakeLimitEnabled) {
-        // Casual mode (no mistake system): simple congrats, record win, auto-start new game
+        // Casual mode: record win; if this was a daily, mark it done
         recordWin(state.difficulty);
+        if (isDailyPlayingRef.current) {
+          markDailyChallengeCompleted();
+          setDailyChallengeCompleted(true);
+          isDailyPlayingRef.current = false;
+        }
         clearGameProgress(state.difficulty);
         setTimeout(() => {
           setIsLoading(true);
@@ -338,6 +353,12 @@ function App() {
     const diff = state.difficulty;
     addEntry(playerName, diff, state.timeElapsed, pointsActive ? finalScore : 0);
     recordWin(diff);
+    // If the player was on the daily challenge, mark it done
+    if (isDailyPlayingRef.current) {
+      markDailyChallengeCompleted();
+      setDailyChallengeCompleted(true);
+      isDailyPlayingRef.current = false;
+    }
     clearGameProgress(diff);
     setShowCompletionModal(false);
     setPlayerName('');
@@ -452,7 +473,7 @@ function App() {
       {/* ── Modals ── */}
       <AnimatePresence mode="wait">
         {showHowToPlay && (
-          <PageTransition className="fixed inset-0 z-100">
+          <PageTransition key="howToPlay" className="fixed inset-0 z-100">
             <HowToPlay
               onClose={() => setShowHowToPlay(false)}
               onShowLeaderboard={() => setShowLeaderboard(true)}
@@ -466,12 +487,12 @@ function App() {
           </PageTransition>
         )}
         {showPrivacy && (
-          <PageTransition className="fixed inset-0 z-100">
+          <PageTransition key="privacy" className="fixed inset-0 z-100">
             <PrivacyPolicy
               onClose={() => setShowPrivacy(false)}
               onShowHowToPlay={() => { setShowPrivacy(false); setShowHowToPlay(true); }}
-              onShowStats={() => { setShowPrivacy(false); setShowStats(true); }}
-              onShowSettings={() => { setShowPrivacy(false); setShowSettings(true); }}
+              onShowStats={() => setShowStats(true)}
+              onShowSettings={() => setShowSettings(true)}
               onShowTerms={() => { setShowPrivacy(false); setShowTerms(true); }}
               onShowPrivacy={() => { setShowPrivacy(false); setShowPrivacy(true); }}
               footerBgEnabled={footerBgEnabled}
@@ -481,26 +502,33 @@ function App() {
         )}
 
         {showDaily && (
-          <PageTransition className="fixed inset-0 z-100">
+          <PageTransition key="daily" className="fixed inset-0 z-100">
             <DailyChallenges
               onClose={() => setShowDaily(false)}
               onShowHowToPlay={() => { setShowDaily(false); setShowHowToPlay(true); }}
-              onShowStats={() => { setShowDaily(false); setShowStats(true); }}
-              onShowSettings={() => { setShowDaily(false); setShowSettings(true); }}
+              onShowStats={() => setShowStats(true)}
+              onShowSettings={() => setShowSettings(true)}
               onShowPrivacy={() => { setShowDaily(false); setShowPrivacy(true); }}
               onShowTerms={() => { setShowDaily(false); setShowTerms(true); }}
               footerBgEnabled={footerBgEnabled}
+              appBgEnabled={appBgEnabled}
               isDark={isDark}
+              currentStreak={currentStreak}
+              dailyChallengeCompleted={dailyChallengeCompleted}
+              onShowDailyChallenge={() => {
+                setShowDaily(false);
+                handleDailyChallenge();
+              }}
             />
-          </PageTransition>
+          </PageTransition> 
         )}
         {showTerms && (
-          <PageTransition className="fixed inset-0 z-100">
+          <PageTransition key="terms" className="fixed inset-0 z-100">
             <TermsOfService
               onClose={() => setShowTerms(false)}
               onShowHowToPlay={() => { setShowTerms(false); setShowHowToPlay(true); }}
-              onShowStats={() => { setShowTerms(false); setShowStats(true); }}
-              onShowSettings={() => { setShowTerms(false); setShowSettings(true); }}
+              onShowStats={() => setShowStats(true)}
+              onShowSettings={() => setShowSettings(true)}
               onShowTerms={() => { setShowTerms(false); setShowTerms(true); }}
               onShowPrivacy={() => { setShowTerms(false); setShowPrivacy(true); }}
               footerBgEnabled={footerBgEnabled}
@@ -508,9 +536,12 @@ function App() {
             />
           </PageTransition>
         )}
+      </AnimatePresence>
 
+      {/* ── Overlays (can overlap with main pages) ── */}
+      <AnimatePresence>
         {showLeaderboard && (
-          <PageTransition className="fixed inset-0 z-100">
+          <PageTransition key="leaderboard" className="fixed inset-0 z-100">
             <Leaderboard
               entries={entries}
               onClose={() => setShowLeaderboard(false)}
@@ -518,33 +549,33 @@ function App() {
             />
           </PageTransition>
         )}
-      {showSettings && (
-        <PageTransition className="fixed inset-0 z-100">
-        <Settings
-          theme={theme}
-          onThemeChange={setTheme}
-          mistakeLimitEnabled={mistakeLimitEnabled}
-          onMistakeLimitChange={handleMistakeLimitChange}
-          trailEnabled={trailEnabled}
-          onTrailEnabledChange={handleTrailEnabledChange}
-          difficultyBorderEnabled={difficultyBorderEnabled}
-          onDifficultyBorderChange={handleDifficultyBorderChange}
-          boardBgEnabled={boardBgEnabled}
-          onBoardBgChange={handleBoardBgChange}
-          appBgEnabled={appBgEnabled}
-          onAppBgChange={handleAppBgChange}
-          footerBgEnabled={footerBgEnabled}
-          onFooterBgChange={handleFooterBgChange}
-          mobileNavEnabled={mobileNavEnabled}
-          onMobileNavEnabledChange={handleMobileNavEnabledChange}
-          soundEnabled={soundEnabled}
-          onSoundEnabledChange={handleSoundEnabledChange}
-          musicEnabled={musicEnabled}
-          onMusicEnabledChange={handleMusicEnabledChange}
-          onClose={() => setShowSettings(false)}
-        />
-        </PageTransition>
-      )}
+        {showSettings && (
+          <PageTransition key="settings" className="fixed inset-0 z-100">
+            <Settings
+              theme={theme}
+              onThemeChange={setTheme}
+              mistakeLimitEnabled={mistakeLimitEnabled}
+              onMistakeLimitChange={handleMistakeLimitChange}
+              trailEnabled={trailEnabled}
+              onTrailEnabledChange={handleTrailEnabledChange}
+              difficultyBorderEnabled={difficultyBorderEnabled}
+              onDifficultyBorderChange={handleDifficultyBorderChange}
+              boardBgEnabled={boardBgEnabled}
+              onBoardBgChange={handleBoardBgChange}
+              appBgEnabled={appBgEnabled}
+              onAppBgChange={handleAppBgChange}
+              footerBgEnabled={footerBgEnabled}
+              onFooterBgChange={handleFooterBgChange}
+              mobileNavEnabled={mobileNavEnabled}
+              onMobileNavEnabledChange={handleMobileNavEnabledChange}
+              soundEnabled={soundEnabled}
+              onSoundEnabledChange={handleSoundEnabledChange}
+              musicEnabled={musicEnabled}
+              onMusicEnabledChange={handleMusicEnabledChange}
+              onClose={() => setShowSettings(false)}
+            />
+          </PageTransition>
+        )}
       </AnimatePresence>
       {showStats && (
         <Stats
@@ -1156,35 +1187,48 @@ function App() {
 
             {/* ── Right: Progress & Tips ── */}
             <aside className="hidden xl:flex flex-col gap-6 w-72 h-fit">
-              <div className="bg-surface-container-low p-6 rounded-4xl">
+              <div className="bg-(--color-surface-container-low) p-6 rounded-4xl border border-(--color-outline-variant)/10 shadow-sm">
+                {/* Daily Challenge Button */}
                 <button
                   onClick={handleDailyChallenge}
-                  className=" w-full py-3  bg-surface-container-lowest text-primary border border-outline-variant/20 rounded-xl font-label font-bold text-sm tracking-wider uppercase hover:bg-surface-container-highest transition-colors"
+                  className="w-full py-3 bg-(--color-surface-container-lowest) text-(--color-primary) border border-(--color-outline-variant)/30 rounded-xl font-label font-bold text-sm tracking-wider uppercase transition-all duration-300 ease-out hover:bg-(--color-surface-container-highest) hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-(--color-primary)/50"
                 >
                   Daily Challenge
                 </button>
-                <div className="relative w-full aspect-square rounded-3xl overflow-hidden mb-4 mt-4">
+                
+                {/* Streak Counter Card */}
+                <div className="relative w-full aspect-square rounded-3xl overflow-hidden mb-4 mt-4 bg-(--color-surface-container) group border border-(--color-outline-variant)/20">
                   <img
                     alt="Math abstract"
-                    className="object-cover w-full h-full opacity-40"
+                    className="object-cover w-full h-full opacity-40 transition-transform duration-700 ease-out group-hover:scale-110"
                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuA--yB78zZ3fFPtPpyL9IQXW0AaNIe6w0FbUJFPMyh1Icl8050-T5ylQpilOuQKloJypTBVDseK5MfhQIBStAaUXBRW0EGfhm1SxBhyYdoSf388laai8ltZBqQBHb953_JKQr1osxYPzC6gXPYSJis_8EBSvxiiANJGdj3zSoKbgm06JAKYSUUkYHTQ0kwlIn9qoQKL8vOZsItz-liYQQ5leYY3r1r_GnAUXi-6g2YTZoKh1PrtS4xLFms-fQoEGLXg4DBLoTBWz3gW"
                   />
+
+                  {/* Gradient Overlay for enhanced readability */}
+                  <div className="absolute inset-0 bg-linear-to-b from-(--color-surface-container-lowest)/10 via-transparent to-(--color-surface-container-lowest)/20" />
+
                   <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
-                    <span className="text-primary font-bold text-lg mb-1">Sudoku Streak</span>
-                    <span className="text-4xl font-extrabold text-on-surface font-headline">{currentStreak}</span>
-                    <span className="text-xs text-on-surface-variant font-medium">Consecutive Days</span>
+                    <span className="text-(--color-primary) font-bold text-lg mb-1 tracking-wide drop-shadow-sm">
+                      Sudoku Streak
+                    </span>
+                    <span className="text-4xl font-extrabold text-(--color-on-surface) font-headline transition-transform duration-300 group-hover:scale-105">
+                      {currentStreak}
+                    </span>
+                    <span className="text-xs text-(--color-on-surface-variant) font-medium mt-1 tracking-wider uppercase opacity-80">
+                      Consecutive Days
+                    </span>
                   </div>
                 </div>
                 <button
                   onClick={() => setShowLeaderboard(true)}
-                  className="w-full py-3 bg-surface-container-lowest text-primary border border-outline-variant/20 rounded-xl font-label font-bold text-sm tracking-wider uppercase hover:bg-surface-container-highest transition-colors"
+                  className="w-full py-3 bg-(--color-surface-container-lowest) text-(--color-primary) border border-(--color-outline-variant)/30 rounded-xl font-label font-bold text-sm tracking-wider uppercase transition-all duration-300 ease-out hover:bg-(--color-surface-container-highest) hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-(--color-primary)/50"
                 >
                   View Leaderboard
-                </button> 
+                </button>
               </div>
 
               <div className="bg-secondary-fixed p-6 rounded-2xl">
-                <h4 className="text-on-secondary-fixed-variant text-xs font-bold uppercase tracking-widest mb-2 flex items-center gap-2">Architectural Tip <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-square-pen-icon lucide-square-pen"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z" /></svg> </h4>
+                <h4 className="text-on-secondary-fixed-variant text-xs font-bold uppercase tracking-widest mb-2 flex items-center gap-2">Architectural Tip <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-square-pen-icon lucide-square-pen"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z" /></svg> </h4>
                 <p className="text-on-secondary-fixed-variant font-body text-sm font-medium leading-relaxed">
                   {/**Fallback tips */}
                   {randomTip?.tip || 'Look for "Naked Pairs" in the central sub-grid to unlock the hidden five.'}
@@ -1299,7 +1343,7 @@ function App() {
 
               <button onClick={() => setShowDaily(true)} className="flex flex-col items-center gap-1 text-primary">
                 <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>calendar_today</span>
-                <span className="font-label text-[10px] font-bold uppercase tracking-wider">Daily</span>
+                <span className="font-label text-[10px] font-bold uppercase tracking-wider">Streak</span>
               </button>
               <button
                 onClick={() => setShowHowToPlay(true)}

@@ -426,6 +426,37 @@ export function getDailyChallenge(): SudokuPuzzle {
   return chosen;
 }
 
+// ─── Daily Challenge Completion Tracking ──────────────────────────────────────
+
+const DAILY_COMPLETED_KEY = 'sudoku-daily-completed';
+
+/**
+ * Returns true if today's daily challenge has already been completed.
+ */
+export function isDailyChallengeCompleted(): boolean {
+  try {
+    const raw = localStorage.getItem(DAILY_COMPLETED_KEY);
+    if (!raw) return false;
+    const { date } = JSON.parse(raw) as { date: string };
+    return date === todayDateString();
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Marks today's daily challenge as completed.
+ * Call this when the player wins a daily-mode game.
+ */
+export function markDailyChallengeCompleted(): void {
+  try {
+    localStorage.setItem(
+      DAILY_COMPLETED_KEY,
+      JSON.stringify({ date: todayDateString() }),
+    );
+  } catch { /* quota / private mode */ }
+}
+
 // ─── Legacy export (QA / internal testing fallback) ──────────────────────────
 
 /**
