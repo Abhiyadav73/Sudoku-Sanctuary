@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import AnimatedDivider from './Components/AnimatedDivider';
 import Navbar from './Components/Navbar';
 import Footer from './Components/Footer';
+import Indicator from './Components/Indicator';
 
 interface Props {
   onClose: () => void;
@@ -25,6 +26,7 @@ export default function TermsOfService({ onClose, onShowHowToPlay, onShowStats, 
 
   return (
     <div className="fixed inset-0 z-100 bg-surface overflow-y-auto overflow-x-hidden font-body text-on-surface flex flex-col">
+      <Indicator />
       {/* TopAppBar */}
       <Navbar onShowHowToPlay={onShowHowToPlay} onShowStats={onShowStats} onShowSettings={onShowSettings} onClose={onClose}/>
 

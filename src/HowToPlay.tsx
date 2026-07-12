@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import AnimatedDivider from './Components/AnimatedDivider';
+import Indicator from './Components/Indicator';
 
 interface Props {
   onClose: () => void;
@@ -49,6 +50,7 @@ export default function HowToPlay({ onClose, onShowLeaderboard, onShowStats, onS
     <div className="fixed inset-0 z-100 bg-surface overflow-y-auto overflow-x-hidden font-body text-on-surface selection:bg-primary-fixed selection:text-on-primary-fixed-variant flex flex-col">
       {/* TopAppBar */}
       <header className="bg-surface/90 backdrop-blur-md full-width top-0 z-50 sticky shadow-sm">
+        <Indicator/>
         <div className="flex justify-between items-center px-10 py-6 w-full max-w-[1440px] mx-auto">
           <div className="flex items-center gap-6">
             <button 

@@ -4,7 +4,6 @@ interface StreakCardProps {
     timeLeft?: string;
     streakMessage?: string;
     onShowDailyChallenge?: () => void;
-    /** True if the player has already completed today's daily challenge */
     isDailyChallengeCompleted?: boolean;
 }
 
@@ -14,7 +13,7 @@ export default function StreakCard({
     streakMessage = "You're on fire! Keep it up.",
     onShowDailyChallenge,
     isDailyChallengeCompleted = true,
-}: StreakCardProps) {
+}: StreakCardProps) { 
     return (
         <div className="w-full bg-(--color-surface-container-low-tint)/80 backdrop-blur-sm/10 p-5 md:p-6 rounded-2xl border border-(--color-outline-variant)/10 shadow-sm hover:shadow-[0_0_25px_5px_var(--color-primary)]/15 hover:scale-102 hover:border-(--color-primary)/30 transition-all duration-500 ease-out" style={{ backgroundColor: isDailyChallengeCompleted ? '#4caf50' : 'var(--color-surface-container-low-tint)' }}
 > 
@@ -22,7 +21,6 @@ export default function StreakCard({
                 {/* Row 1 */}
                 <div className="flex items-center justify-between w-full">
                     <div className="flex items-center gap-4">
-                        {/* Animated Fire GIF Container with Number Overlaid */}
                         <div className="relative flex items-center justify-center w-14 h-14 select-none group">
                             <img
                                 src="firegif.gif"

@@ -38,6 +38,7 @@ import easyData   from '../easy.json';
 import mediumData from '../medium.json';
 import hardData   from '../hard.json';
 import expertData from '../expert.json';
+import { dbService } from './dbService';
 
 const JSON_DATASETS: Record<
   Difficulty,
@@ -444,17 +445,24 @@ export function isDailyChallengeCompleted(): boolean {
   }
 }
 
-/**
- * Marks today's daily challenge as completed.
- * Call this when the player wins a daily-mode game.
- */
-export function markDailyChallengeCompleted(): void {
+export async function markDailyChallengeCompleted(): Promise<void> {
+  const today = todayDateString();
   try {
     localStorage.setItem(
       DAILY_COMPLETED_KEY,
-      JSON.stringify({ date: todayDateString() }),
+      JSON.stringify({ date: today }),
     );
   } catch { /* quota / private mode */ }
+
+  try {
+    const existing = await dbService.get(today);
+    const updated = existing
+      ? { ...existing, challengeCompleted: true }
+      : { dateStr: today, challengeCompleted: true };
+    await dbService.put(updated);
+  } catch (err) {
+    console.error('Failed to update calendar database with challenge completion', err);
+  }
 }
 
 // ─── Legacy export (QA / internal testing fallback) ──────────────────────────

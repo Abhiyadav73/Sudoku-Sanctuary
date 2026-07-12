@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import Typed from 'typed.js';
 import AnimatedDivider from './Components/AnimatedDivider';
+import Indicator from './Components/Indicator';
 
 interface WelcomeScreenProps {
   onStart: () => void;
@@ -144,6 +145,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart, onSettings, onHo
       `}</style>
       
       {/* TopAppBar */}
+      <Indicator/>
       <header className="bg-surface/80 backdrop-blur-md fixed top-0 w-full z-50 border-b border-outline-variant/10">
         <nav className="flex justify-between items-center px-10 py-6 w-full max-w-7xl mx-auto">
           <div className="text-display-md font-headline font-black text-primary tracking-tight cursor-default text-xl">

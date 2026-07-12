@@ -1,6 +1,11 @@
 @import "tailwindcss";
 @config "../tailwind.config.js";
 
+html,body{
+  scroll-behavior: smooth;
+}
+
+
 /* ─── Light mode CSS variables (default) ─── */
 :root {
   --color-primary: #3525cd;
@@ -37,7 +42,9 @@
   --color-surface-container-lowest: #ffffff;
   --color-surface-container-low: #f2f4f6;
   --color-surface-container-low-tint: #f59f5a;
-   --color-surface-container-high-tint: #f3872e;
+  --color-surface-container-high-tint: #f3872e;
+  --color-background-tint: #E6F2DD;
+  --color-text-visible:#307470; 
   --color-text-tint: #ffffff;
   --color-surface-container: #eceef0;
   --color-surface-container-high: #e6e8ea;
@@ -222,6 +229,31 @@
   font-weight: 700;
   font-style: italic;
 }
+
+.ibm-plex-mono-regular {
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.ibm-plex-mono-medium {
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 500;
+  font-style: normal;
+}
+
+.ibm-plex-mono-semibold {
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.ibm-plex-mono-bold {
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 700;
+  font-style: normal;
+}
+
 
 /*Nav Links Underline*/
 .nav-link-underline {

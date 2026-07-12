@@ -1,5 +1,8 @@
 import { useEffect } from 'react';
 import AnimatedDivider from './Components/AnimatedDivider';
+import Navbar from './Components/Navbar';
+import Footer from './Components/Footer';
+import Indicator from './Components/Indicator';
 
 
 interface Props {
@@ -13,7 +16,7 @@ interface Props {
   isDark?: boolean;
 }
 
-export default function PrivacyPolicy({ onClose, onShowHowToPlay, onShowStats, onShowSettings, onShowTerms,onShowPrivacy, footerBgEnabled, isDark }: Props) {
+export default function PrivacyPolicy({ onClose, onShowHowToPlay, onShowStats, onShowSettings, onShowTerms, onShowPrivacy, footerBgEnabled, isDark }: Props) {
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     return () => {
@@ -22,34 +25,13 @@ export default function PrivacyPolicy({ onClose, onShowHowToPlay, onShowStats, o
   }, []);
 
   return (
+    <>
+    <div className="absolute inset-0 z-101 pointer-events-none">
+      <Indicator/>
+    </div>
     <div className="fixed inset-0 z-100 bg-surface overflow-y-auto overflow-x-hidden font-body text-on-surface flex flex-col">
       {/* TopAppBar */}
-      <header className="bg-surface/90 backdrop-blur-md full-width top-0 z-50 sticky shadow-sm">
-        <div className="flex justify-between items-center px-10 py-6 w-full max-w-[1440px] mx-auto">
-          <div className="flex items-center gap-6">
-            <button 
-              onClick={onClose}
-              className="text-primary hover:bg-surface-variant/50 transition-colors duration-300 pt-[8px] rounded-full scale-95 active:scale-90"
-            >
-              <span className="material-symbols-outlined">arrow_back</span>
-            </button>
-            <h1 className="font-headline text-2xl font-extrabold text-primary tracking-tight"><span className='bigbesty'>Sudoku Sanctuary</span></h1>
-          </div>
-          <div className="flex items-center gap-4">
-            <nav className="hidden md:flex items-center gap-8 mr-4">
-              <button onClick={onClose} className="nav-link-underline text-on-surface-variant font-label text-sm hover:text-primary transition-colors duration-300 cursor-pointer"><span className='titillium-web-regular text-lg font-semibold'>Play</span></button>
-              <button onClick={onShowStats} className="nav-link-underline text-on-surface-variant font-label text-sm  hover:text-primary transition-colors duration-300 cursor-pointer"><span className='titillium-web-regular text-lg font-semibold'>Stats</span></button>
-              <button onClick={onShowHowToPlay} className="nav-link-underline text-on-surface-variant font-label text-sm hover:text-primary transition-colors duration-300 cursor-pointer"><span className='titillium-web-regular text-lg font-semibold'>How to Play</span></button>
-            </nav>
-            <button 
-              onClick={onShowSettings} 
-              className="material-symbols-outlined text-on-surface-variant hover:text-primary hover:bg-surface-container-highest p-2.5 rounded-full transition-all duration-300 scale-95 active:scale-90 hover:rotate-90 cursor-pointer"
-            >
-              settings
-            </button>
-          </div>
-        </div>
-      </header>
+      <Navbar onShowHowToPlay={onShowHowToPlay} onShowStats={onShowStats} onShowSettings={onShowSettings} onClose={onClose} />
 
       <main className="pt-12 pb-24 px-6 md:px-10 max-w-5xl mx-auto relative flex-1 w-full">
         {/* Atmospheric Grid Background */}
@@ -145,7 +127,7 @@ export default function PrivacyPolicy({ onClose, onShowHowToPlay, onShowStats, o
               </div>
               <div className="hidden lg:block text-primary/10 select-none transition-transform duration-700 group-hover:scale-110 group-hover:-rotate-6">
                 <span className="material-symbols-outlined text-[180px]" style={{ fontVariationSettings: "'wght' 800" }}>shield_person</span>
-              </div> 
+              </div>
             </div>
           </div>
         </div>
@@ -190,37 +172,9 @@ export default function PrivacyPolicy({ onClose, onShowHowToPlay, onShowStats, o
       <AnimatedDivider marginClass="mt-0" />
 
       {/* Footer */}
-      <footer className="w-full flex flex-col mt-auto border-t border-outline-variant/10">
-        <div
-          className={`w-full relative ${footerBgEnabled ? '' : 'bg-surface-container-low'}`}
-          style={footerBgEnabled ? {
-            backgroundImage: `url('${isDark ? '/w-footer-dark.png' : '/w-footer-lite.png'}')`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          } : undefined}
-        >
-          {footerBgEnabled && (
-            <div className="absolute inset-0 z-0" style={{
-              background: isDark ? 'linear-gradient(to bottom, rgba(25,28,30,0.8), rgba(25,28,30,0.95))' : 'linear-gradient(to bottom, rgba(255,255,255,0.8), rgba(255,255,255,0.95))'
-            }} />
-          )}
-          <div className="relative z-10 flex flex-col md:flex-row justify-between items-center md:items-end px-10 py-12 w-full max-w-7xl mx-auto gap-6">
-            <div className="flex flex-col items-center md:items-start gap-2">
-              <div className="text-2xl font-headline font-bold text-on-surface"><span className='bigbesty'>Sudoku Sanctuary</span></div>
-              <p className="font-body text-label-md text-on-surface-variant tracking-wide text-center md:text-left">
-                © {new Date().getFullYear()} Mindgames Sanctuary.All Rights Reserved.
-              </p>
-            </div>
-            <div className="flex gap-8 items-center text-sm">
-              <button onClick={onShowPrivacy} className="text-primary font-medium tracking-wide cursor-pointer">Privacy Policy</button>
-              <button onClick={onShowTerms} className="text-on-surface-variant hover:text-primary transition-all font-medium tracking-wide cursor-pointer">Terms of Service</button>
-            </div>
-          </div>
-          <div className="relative z-10 w-full text-center pb-8 text-label-md font-medium text-on-surface-variant opacity-90">
-            Made with ❤️ in India
-          </div>
-        </div>
-      </footer>
+      <Footer onShowPrivacy={onShowPrivacy} onShowTerms={onShowTerms} footerBgEnabled={footerBgEnabled} isDark={isDark} />
     </div>
+    </>
   );
+
 }

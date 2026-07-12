@@ -1,4 +1,5 @@
-import React from 'react'
+import Indicator from "./Indicator";
+
 
 
 interface Props {
@@ -10,7 +11,8 @@ interface Props {
 
 export default function Footer({footerBgEnabled, isDark, onShowTerms, onShowPrivacy}: Props) {
   return (
-    <footer className="w-full flex flex-col mt-auto border-t border-outline-variant/10">
+    <>
+    <footer className="w-full flex flex-col mt-auto border-t border-outline-variant/10 border-b-2 border-b-gray-200"> 
         <div
           className={`w-full relative ${footerBgEnabled ? '' : 'bg-surface-container-low'}`}
           style={footerBgEnabled ? {
@@ -40,6 +42,12 @@ export default function Footer({footerBgEnabled, isDark, onShowTerms, onShowPriv
             Made with ❤️ in India | Enjoy 😊
           </div>
         </div>
+        <div className="w-full h-3" style={{
+          backgroundImage:'url(footerPattern.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}></div>
       </footer>
+      </>
   )
 }

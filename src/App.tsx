@@ -14,6 +14,7 @@ import CircularTrail from './Components/Circulartrail';
 import LoadingSpinner from './Components/LoadingSpinner';
 import AnimatedDivider from './Components/AnimatedDivider';
 import WinnerCard from './Components/WinnerCard';
+import Indicator from './Components/Indicator';
 import WelcomeScreen from './WelcomeScreen';
 import PrivacyPolicy from './PrivacyPolicy';
 import TermsOfService from './TermsOfService';
@@ -31,6 +32,7 @@ import {
   markDailyChallengeCompleted,
 } from './useDynamicPuzzle';
 import React from 'react';
+
 
 function App() {
   const {
@@ -268,7 +270,6 @@ function App() {
   };
 
   // ── Daily Challenge ───────────────────────────────────────────────────────
-  // Whether the currently active puzzle was started as a daily challenge
   const isDailyPlayingRef = React.useRef(false);
   const [dailyChallengeCompleted, setDailyChallengeCompleted] = useState<boolean>(
     () => isDailyChallengeCompleted()
@@ -289,20 +290,20 @@ function App() {
   useEffect(() => {
     if (isComplete && !completionHandled.current) {
       completionHandled.current = true;
-      // Stop timer immediately
       stopGame();
       gameWin();
       const fs = calculateFinalScore(state.timeElapsed);
       setFinalScore(fs);
 
+      // Immediately mark daily challenge completed if playing daily challenge
+      if (isDailyPlayingRef.current) {
+        markDailyChallengeCompleted();
+        setDailyChallengeCompleted(true);
+        isDailyPlayingRef.current = false;
+      }
+
       if (!mistakeLimitEnabled) {
-        // Casual mode: record win; if this was a daily, mark it done
         recordWin(state.difficulty);
-        if (isDailyPlayingRef.current) {
-          markDailyChallengeCompleted();
-          setDailyChallengeCompleted(true);
-          isDailyPlayingRef.current = false;
-        }
         clearGameProgress(state.difficulty);
         setTimeout(() => {
           setIsLoading(true);
@@ -353,18 +354,11 @@ function App() {
     const diff = state.difficulty;
     addEntry(playerName, diff, state.timeElapsed, pointsActive ? finalScore : 0);
     recordWin(diff);
-    // If the player was on the daily challenge, mark it done
-    if (isDailyPlayingRef.current) {
-      markDailyChallengeCompleted();
-      setDailyChallengeCompleted(true);
-      isDailyPlayingRef.current = false;
-    }
+    
     clearGameProgress(diff);
     setShowCompletionModal(false);
     setPlayerName('');
     setShowLeaderboard(true);
-    // Pre-load a fresh puzzle in the background so the board is ready
-    // the moment the user closes the leaderboard.
     handleGenerateBoard(diff);
   };
 
@@ -471,7 +465,7 @@ function App() {
 
 
       {/* ── Modals ── */}
-      <AnimatePresence mode="wait">
+      <AnimatePresence>
         {showHowToPlay && (
           <PageTransition key="howToPlay" className="fixed inset-0 z-100">
             <HowToPlay
@@ -773,6 +767,7 @@ function App() {
             </>
           )}
           {/* ── Top Navigation Bar ── */}
+          <Indicator />
           <header className="bg-surface/80 backdrop-blur-lg top-0 z-51 fixed w-full ">
             <div className="flex justify-between items-center w-full px-4 sm:px-10 py-4 sm:py-6 max-w-[1440px] mx-auto">
               <div className="flex items-center gap-4 sm:gap-12">
@@ -780,7 +775,6 @@ function App() {
                   {/* The vertical bar */}
                   <div className=" hidden w-1.5 bg-[#ff0099] rounded-full shrink-0" />
 
-                  {/* The container for text, preventing word breaks */}
                   <div className="flex flex-col sm:flex-row sm:items-baseline gap-0 sm:gap-1.5 text-xl sm:text-2xl font-extrabold tracking-tight">
                     <span className="bigbesty"><span className='text-2xl'>S</span>udoku</span>
                     <span className="text-[#ff0099]  sm:text-2xl bigbesty">
@@ -1192,12 +1186,13 @@ function App() {
                 <button
                   onClick={handleDailyChallenge}
                   className="w-full py-3 bg-(--color-surface-container-lowest) text-(--color-primary) border border-(--color-outline-variant)/30 rounded-xl font-label font-bold text-sm tracking-wider uppercase transition-all duration-300 ease-out hover:bg-(--color-surface-container-highest) hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-(--color-primary)/50"
+                  style={{ backgroundColor: dailyChallengeCompleted ? '#4caf50' : 'var(--color-surface-container-lowest)',color: dailyChallengeCompleted ? '#fff' : 'var(--color-primary)' }}
                 >
-                  Daily Challenge
+                  {dailyChallengeCompleted ? <div className='flex items-center justify-center gap-2'><span className='material-symbols-outlined text-sm'>check_circle</span> Completed</div> : 'Start Daily Challenge'}
                 </button>
                 
                 {/* Streak Counter Card */}
-                <div className="relative w-full aspect-square rounded-3xl overflow-hidden mb-4 mt-4 bg-(--color-surface-container) group border border-(--color-outline-variant)/20">
+                <div className="relative w-full aspect-square rounded-3xl overflow-hidden mb-4 mt-4 bg-(--color-surface-container) group border border-(--color-outline-variant)/20"> 
                   <img
                     alt="Math abstract"
                     className="object-cover w-full h-full opacity-40 transition-transform duration-700 ease-out group-hover:scale-110"
