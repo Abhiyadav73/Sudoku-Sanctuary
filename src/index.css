@@ -153,8 +153,8 @@ html,body{
 /* ----Font ----*/
 @font-face {
   font-family: 'Bigbesty';
-  src: url('./Fonts/Bigbesty.otf') format('opentype'),
-    url('./Fonts/Bigbesty.ttf') format('truetype');
+  src: url('/Fonts/Bigbesty.otf') format('opentype'),
+    url('/Fonts/Bigbesty.ttf') format('truetype');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
