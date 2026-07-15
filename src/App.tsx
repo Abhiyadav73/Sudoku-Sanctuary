@@ -295,7 +295,6 @@ function App() {
       const fs = calculateFinalScore(state.timeElapsed);
       setFinalScore(fs);
 
-      // Immediately mark daily challenge completed if playing daily challenge
       if (isDailyPlayingRef.current) {
         markDailyChallengeCompleted();
         setDailyChallengeCompleted(true);
@@ -313,7 +312,7 @@ function App() {
           }, 800);
         }, 400);
       } else {
-        // Point system mode: show full completion modal with WinnerCard
+
         setTimeout(() => {
           setIsLoading(true);
           setTimeout(() => {
@@ -385,10 +384,8 @@ function App() {
       if (showCompletionModal || showLeaderboard || showSettings || showHowToPlay || state.isPaused) return;
       if (e.key >= '1' && e.key <= '9') {
         const num = parseInt(e.key, 10);
-        // Skip if this number is fully placed on the board
         const numCount = state.board.filter(cell => cell.value === num).length;
         if (numCount >= 9) return;
-        // Keyboard input — register point action using approximate position
         if (state.selectedCell !== null && state.solution && !state.notesMode) {
           const correctVal = parseInt(state.solution[state.selectedCell], 10);
           const currentVal = state.board[state.selectedCell].value;
@@ -432,7 +429,6 @@ function App() {
   ]);
 
   const handleDifficultyChange = (diff: Difficulty) => {
-    // When switching difficulty, resume that difficulty's saved game if it exists
     handleResumeOrStart(diff);
     setIsDifficultyDropdownOpen(false);
   };
@@ -671,7 +667,6 @@ function App() {
               <div className="flex gap-3 mt-4">
                 <button
                   onClick={() => {
-                    // Skip: record win, clear progress, close modal, start new game
                     recordWin(state.difficulty);
                     clearGameProgress(state.difficulty);
                     setShowCompletionModal(false);

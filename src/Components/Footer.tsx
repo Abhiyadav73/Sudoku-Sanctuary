@@ -1,7 +1,3 @@
-import Indicator from "./Indicator";
-
-
-
 interface Props {
     footerBgEnabled?: boolean;
     isDark?: boolean;
