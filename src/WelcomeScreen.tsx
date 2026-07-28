@@ -70,7 +70,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart, onSettings, onHo
 
   useEffect(() => {
     const typed = new Typed('#typed', {
-      strings: ["Fun","Brain Storm","Engaging","Challenging"],
+      strings: ["Challenges", "Ideas", "Creativity","Puzzles","Number","Your Brain"],
       typeSpeed: 40,
       backSpeed: 30,
       smartBackspace: true,
@@ -149,7 +149,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart, onSettings, onHo
       <header className="bg-surface/80 backdrop-blur-md fixed top-0 w-full z-50 border-b border-outline-variant/10">
         <nav className="flex justify-between items-center px-10 py-6 w-full max-w-7xl mx-auto">
           <div className="text-display-md font-headline font-black text-primary tracking-tight cursor-default text-xl">
-            <span className='bigbesty animate-fade-in text-2xl'>Sudoku Sanctuary</span> 
+            <span className='bigbesty animate-fade-in text-2xl text-navtx'>Sudoku <span className="text-[#ff0099]">Sanctuary</span></span>  
           </div>
           <div className="hidden md:flex items-center gap-10">
             <button onClick={onStart} className="nav-link-underline hover:text-primary transition-colors duration-300"><span className='titillium-web-regular text-lg font-semibold'>Play</span></button>  
@@ -161,7 +161,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart, onSettings, onHo
         </nav>
       </header>
 
-      <main className="pt-24 min-h-screen flex flex-col">
+      <main className={`pt-24 min-h-screen flex flex-col relative flex-1 w-full`}>
         {/* Hero Section */}
         <section className="relative px-10 py-20 md:py-32 flex flex-col lg:flex-row items-center justify-between max-w-7xl mx-auto w-full gap-16 overflow-hidden">
           {/* Text Content */}

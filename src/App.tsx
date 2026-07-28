@@ -57,13 +57,42 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [hasStarted, setHasStarted] = useState(false);
   const [randomTip, _] = useState(tips[Math.floor(Math.random() * tips.length)]);
-  //const [resetCount, setResetCount] = useState(0)
-  //const [hintUsed, setHintUsed] = useState(0)
+  const [resetCount, setResetCount] = useState(0);
+  const [hintUsed, setHintUsed] = useState(0);
+  const [currentPuzzleId, setCurrentPuzzleId] = useState<string>('');
+
+  useEffect(() => {
+    if (!currentPuzzleId) return;
+    try {
+      const savedReset = localStorage.getItem(`sudoku-reset-${currentPuzzleId}`);
+      const savedHint = localStorage.getItem(`sudoku-hint-${currentPuzzleId}`);
+      setResetCount(savedReset ? parseInt(savedReset, 10) : 0);
+      setHintUsed(savedHint ? parseInt(savedHint, 10) : 0);
+    } catch {
+      setResetCount(0);
+      setHintUsed(0);
+    }
+  }, [currentPuzzleId]);
+
+  useEffect(() => {
+    if (!currentPuzzleId) return;
+    try {
+      localStorage.setItem(`sudoku-reset-${currentPuzzleId}`, String(resetCount));
+    } catch {}
+  }, [resetCount, currentPuzzleId]);
+
+  useEffect(() => {
+    if (!currentPuzzleId) return;
+    try {
+      localStorage.setItem(`sudoku-hint-${currentPuzzleId}`, String(hintUsed));
+    } catch {}
+  }, [hintUsed, currentPuzzleId]);
 
   useEffect(() => {
     stopGame();
     const timer = setTimeout(() => {
       const { puzzle, progress } = resumeOrStartGame('easy');
+      setCurrentPuzzleId(puzzle.id);
       loadPuzzle(
         puzzle.puzzle,
         puzzle.solution,
@@ -77,7 +106,6 @@ function App() {
       setIsLoading(false);
     }, 1000);
     return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Mistake limit (persisted) ──────────────────────────────────────────────
@@ -104,8 +132,10 @@ function App() {
   const localUser = useTime();
 
   const handleRestart = () => {
+    if (resetCount >= 1) return;
     restartPuzzle();
     resetPoints();
+    setResetCount(prev => prev + 1);
   };
 
 
@@ -244,6 +274,7 @@ function App() {
     setIsLoading(true);
     setTimeout(() => {
       const puzzle = startNewGame(diff);
+      setCurrentPuzzleId(puzzle.id);
       loadPuzzle(puzzle.puzzle, puzzle.solution, puzzle.difficulty, puzzle.id);
       setIsLoading(false);
     }, 600);
@@ -255,6 +286,7 @@ function App() {
     setIsLoading(true);
     setTimeout(() => {
       const { puzzle, progress } = resumeOrStartGame(diff);
+      setCurrentPuzzleId(puzzle.id);
       loadPuzzle(
         puzzle.puzzle,
         puzzle.solution,
@@ -281,6 +313,7 @@ function App() {
     setIsLoading(true);
     setTimeout(() => {
       const puzzle = getDailyChallenge();
+      setCurrentPuzzleId(puzzle.id);
       loadPuzzle(puzzle.puzzle, puzzle.solution, puzzle.difficulty, puzzle.id);
       setIsLoading(false);
     }, 600);
@@ -374,8 +407,15 @@ function App() {
 
   // ── Hint wrapper ──────────────────────────────────────────────────────────
   const handleHint = () => {
+    if (hintUsed >= 3) return;
+    if (state.selectedCell === null || state.isPaused) return;
+
+    const cell = state.board[state.selectedCell];
+    if (cell.fixed || cell.isHint || cell.isCorrect) return;
+
     registerAction('major_hint', getCellCenter(state.selectedCell));
     hint();
+    setHintUsed(prev => prev + 1);
   };
 
   // ── Keyboard support ───────────────────────────────────────────────────────
@@ -434,7 +474,7 @@ function App() {
   };
 
   const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-  const boardbg = ["sudBod2.png", "SudokuBoard.jpeg", "sudboard3.png"]
+  const boardbg = ["sudBod2.png", "SudokuBoard.jpeg", "sudboard3.png","sudboard4.png"]
 
   const [bgImage] = useState(
     () => boardbg[Math.floor(Math.random() * boardbg.length)]
@@ -473,6 +513,7 @@ function App() {
               onShowTerms={() => { setShowHowToPlay(false); setShowTerms(true); }}
               footerBgEnabled={footerBgEnabled}
               isDark={isDark}
+              appBgEnabled={appBgEnabled}
             />
           </PageTransition>
         )}
@@ -763,17 +804,17 @@ function App() {
           )}
           {/* ── Top Navigation Bar ── */}
           <Indicator />
-          <header className="bg-surface/80 backdrop-blur-lg top-0 z-51 fixed w-full ">
-            <div className="flex justify-between items-center w-full px-4 sm:px-10 py-4 sm:py-6 max-w-[1440px] mx-auto">
+          <header className="bg-surface/20 backdrop-blur-lg top-0 z-51 fixed w-full ">
+            <div className="flex justify-between items-center w-full px-4 sm:px-10 py-4 sm:py-6 max-w-360 mx-auto">
               <div className="flex items-center gap-4 sm:gap-12">
                 <div className="flex item-stretch gap-2 font-headline">
                   {/* The vertical bar */}
                   <div className=" hidden w-1.5 bg-[#ff0099] rounded-full shrink-0" />
 
                   <div className="flex flex-col sm:flex-row sm:items-baseline gap-0 sm:gap-1.5 text-xl sm:text-2xl font-extrabold tracking-tight">
-                    <span className="bigbesty"><span className='text-2xl'>S</span>udoku</span>
+                    <span className="bigbesty text-navtx">Sudoku</span> 
                     <span className="text-[#ff0099]  sm:text-2xl bigbesty">
-                      Sanctuary
+                      Sanctuary 
                     </span>
                   </div>
                 </div>
@@ -822,7 +863,7 @@ function App() {
                   title={isFullscreen ? 'Exit Full Screen (f)' : 'Full Screen (f)'}
                 >
                   {isFullscreen ? 'fullscreen_exit' : 'fullscreen'}
-                </button>*/}
+                </button>/*} 
 
                 {/*<button
                   onClick={() => handleGenerateBoard(state.difficulty)}
@@ -835,7 +876,7 @@ function App() {
                     buttonClick();
                     handleGenerateBoard(state.difficulty);
                   }}
-                  className="outline-none appearance-none inline-flex border-2 border-transparent hover:border-white transition-all duration-400 items-center justify-between min-w-[120px] sm:min-w-[200px] rounded-[6px] bg-linear-to-r from-[#3525cd] to-[#dad7ff] px-3 sm:px-5 py-2 sm:py-4 text-white text-[12px] sm:text-[14px] font-semibold uppercase tracking-[1.2px] shadow-[0_4px_12px_rgba(0,0,0,0.1)] overflow-hidden hover:opacity-95 hover:from-green-500 hover:to-green-200"
+                  className="outline-none appearance-none inline-flex transition-all duration-400 items-center justify-between min-w-30 sm:min-w-50 rounded-md bg-linear-to-r from-[#3525cd] to-[#dad7ff] px-3 sm:px-5 py-2 sm:py-4 text-white text-[12px] sm:text-[14px] font-semibold uppercase tracking-[1.2px] shadow-[0_4px_12px_rgba(0,0,0,0.1)] overflow-hidden hover:opacity-95 hover:from-green-500 hover:to-green-300" 
                 >
                   <span className="inline-block animate-ripple" />
                   <span>New Game</span>
@@ -845,7 +886,7 @@ function App() {
             </div>
           </header>
 
-          <main className="flex-1 flex flex-col lg:flex-row max-w-[1440px] mx-auto w-full pt-20 sm:pt-24 px-4 sm:px-6 md:px-10 md:mt-10 gap-6 sm:gap-10 mt-6">
+          <main className="flex-1 flex flex-col lg:flex-row max-w-360 mx-auto w-full pt-20 sm:pt-24 px-4 sm:px-6 md:px-10 md:mt-10 gap-6 sm:gap-10 mt-6">
 
             {/* ── Left: Game Controls ── */}
             <aside className="hidden lg:flex flex-col gap-6 p-8 bg-surface-container-low w-72 shrink-0 h-fit rounded-4xl relative">
@@ -897,24 +938,37 @@ function App() {
                   Notes {state.notesMode && '(On)'}
                 </button>
                 <button
+                  disabled={resetCount >= 1}
                   onClick={handleRestart}
-                  className="text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface font-label px-4 py-3 flex items-center gap-3 font-medium rounded-xl transition-all duration-300"
+                  className={`font-label px-4 py-3 flex items-center gap-3 font-medium rounded-xl transition-all duration-300 ${
+                    resetCount >= 1
+                      ? 'text-on-surface-variant/30 bg-transparent cursor-not-allowed pointer-events-none'
+                      : 'text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface'
+                  }`}
                 >
                   <span className="material-symbols-outlined">refresh</span>
-                  Reset
+                  Reset ({1 - resetCount})
                 </button>
               </div>
 
-              <button onClick={handleHint} className="mt-4 bg-linear-to-r from-primary to-primary-container text-on-primary py-4 rounded-full font-label font-bold tracking-wider uppercase text-sm flex items-center justify-center gap-2 shadow-[0_8px_16px_rgba(53,37,205,0.2)] hover:shadow-[0_12px_24px_rgba(53,37,205,0.3)] active:scale-95 transition-all duration-300">
+              <button
+                disabled={hintUsed >= 3}
+                onClick={handleHint}
+                className={`mt-4 w-full py-4 rounded-full font-label font-bold tracking-wider uppercase text-sm flex items-center justify-center gap-2 transition-all duration-300 ${
+                  hintUsed >= 3
+                    ? 'bg-surface-container-highest text-on-surface-variant/30 cursor-not-allowed pointer-events-none shadow-none'
+                    : 'bg-linear-to-r from-primary to-primary-container text-on-primary shadow-[0_8px_16px_rgba(53,37,205,0.2)] hover:shadow-[0_12px_24px_rgba(53,37,205,0.3)] active:scale-95'
+                }`}
+              >
                 <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>lightbulb</span>
-                Hint
+                Hint ({3 - hintUsed})
               </button>
             </aside>
 
             {/* ── Centre: Grid ── */}
             <section className="flex-1 flex flex-col items-center w-full">
               {/* Game Stats Header */}
-              <div className="w-full max-w-[600px] flex justify-between items-start mb-4 sm:mb-8 px-1 sm:px-2">
+              <div className="w-full max-w-150 flex justify-between items-start mb-4 sm:mb-8 px-1 sm:px-2">
                 <div className="flex flex-col relative z-50">
                   <span className="text-on-surface-variant text-[10px] sm:text-xs font-bold uppercase tracking-widest mb-0 sm:mb-1">Current Level</span>
 
@@ -999,7 +1053,7 @@ function App() {
 
               {/* The Grid */}
               <div
-                className="w-full max-w-[600px] bg-surface-container-lowest p-1 sm:p-6 rounded-xl sm:rounded-4xl shadow-[0_20px_40px_rgba(25,28,30,0.06)] relative transition-all duration-500 overflow-hidden"
+                className="w-full max-w-150 bg-surface-container-lowest p-1 sm:p-6 rounded-xl sm:rounded-4xl shadow-[0_20px_40px_rgba(25,28,30,0.06)] relative transition-all duration-500 overflow-hidden"
                 style={activeBorderStyle}
               >
                 {/* Background Image Layer */}
@@ -1068,44 +1122,59 @@ function App() {
               </div>
 
               {/* Utility Action Buttons (Mobile only) */}
-              <div className="grid lg:hidden w-full max-w-[600px] grid-cols-5 gap-2 sm:gap-4 mt-6">
+              <div className="grid lg:hidden w-full max-w-150 grid-cols-5 gap-2 sm:gap-4 mt-6">
                 <button onClick={undo} className="flex flex-col items-center gap-1 group">
                   <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-xl bg-surface-container-high text-on-surface-variant group-active:scale-95 transition-all">
                     <span className="material-symbols-outlined">undo</span>
                   </div>
-                  <span className="font-label text-[9px] sm:text-[10px] uppercase tracking-widest font-semibold text-outline">Undo</span>
+                  <span className="font-label text-[8px] sm:text-[10px] uppercase tracking-widest font-semibold text-outline">Undo</span>
                 </button>
                 <button onClick={erase} className="flex flex-col items-center gap-1 group">
                   <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-xl bg-surface-container-high text-on-surface-variant group-active:scale-95 transition-all">
                     <span className="material-symbols-outlined">ink_eraser</span>
                   </div>
-                  <span className="font-label text-[9px] sm:text-[10px] uppercase tracking-widest font-semibold text-outline">Erase</span>
+                  <span className="font-label text-[8px] sm:text-[10px] uppercase tracking-widest font-semibold text-outline">Erase</span>
                 </button>
                 <button onClick={toggleNotesMode} className="flex flex-col items-center gap-1 group">
                   <div className={`w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-xl bg-surface-container-high ${state.notesMode ? 'text-primary' : 'text-on-surface-variant'} group-active:scale-95 transition-all relative`}>
                     <span className="material-symbols-outlined">edit</span>
                     {state.notesMode && <span className="absolute top-0 sm:top-1 right-1 sm:right-2 text-[8px] font-bold text-primary">ON</span>}
                   </div>
-                  <span className={`font-label text-[9px] sm:text-[10px] uppercase tracking-widest font-semibold ${state.notesMode ? 'text-primary' : 'text-outline'}`}>Notes</span>
+                  <span className={`font-label text-[8px] sm:text-[10px] uppercase tracking-widest font-semibold ${state.notesMode ? 'text-primary' : 'text-outline'}`}>Notes</span>
                 </button>
-                <button onClick={handleHint} className="flex flex-col items-center gap-1 group">
+                <button
+                  disabled={hintUsed >= 3}
+                  onClick={handleHint}
+                  className={`flex flex-col items-center gap-1 group transition-all duration-300 ${
+                    hintUsed >= 3 ? 'opacity-30 cursor-not-allowed pointer-events-none' : ''
+                  }`}
+                >
                   <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-xl bg-surface-container-high text-on-surface-variant group-active:scale-95 transition-all">
                     <span className="material-symbols-outlined">lightbulb</span>
                   </div>
-                  <span className="font-label text-[9px] sm:text-[10px] uppercase tracking-widest font-semibold text-outline">Hint</span>
+                  <span className="font-label text-[8px] sm:text-[10px] uppercase tracking-widest font-semibold text-outline text-center truncate max-w-16">
+                    Hint ({3 - hintUsed})
+                  </span>
                 </button>
-                <button onClick={handleRestart} className="flex flex-col items-center gap-1 group">
+                <button
+                  disabled={resetCount >= 1}
+                  onClick={handleRestart}
+                  className={`flex flex-col items-center gap-1 group transition-all duration-300 ${
+                    resetCount >= 1 ? 'opacity-30 cursor-not-allowed pointer-events-none' : ''
+                  }`}
+                >
                   <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-xl bg-surface-container-high text-on-surface-variant group-active:scale-95 transition-all">
                     <span className="material-symbols-outlined">refresh</span>
                   </div>
-                  <span className="font-label text-[9px] sm:text-[10px] uppercase tracking-widest font-semibold text-outline">Reset</span>
+                  <span className="font-label text-[8px] sm:text-[10px] uppercase tracking-widest font-semibold text-outline text-center truncate max-w-16">
+                    Reset ({1 - resetCount})
+                  </span>
                 </button>
               </div>
 
               {/* Number Input */}
-              <div className="w-full max-w-[600px] grid grid-cols-9 gap-1 sm:gap-3 mt-6 sm:mt-10 ">
+              <div className="w-full max-w-150 grid grid-cols-9 gap-1 sm:gap-3 mt-6 sm:mt-10 ">
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => {
-                  // Count how many times this number appears on the board
                   const count = state.board.filter(cell => cell.value === num).length;
                   const isFullyPlaced = count >= 9;
 
@@ -1165,7 +1234,7 @@ function App() {
               </div>
 
               {/* Architectural Tip (Responsive View) */}
-              <div className="xl:hidden w-full max-w-[600px] mt-8 bg-secondary-fixed p-6 rounded-4xl">
+              <div className="xl:hidden w-full max-w-150 mt-8 bg-secondary-fixed p-6 rounded-4xl">
                 <h4 className="text-on-secondary-fixed-variant text-xs font-bold uppercase tracking-widest mb-2 flex items-center gap-2">Architectural Tip <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-square-pen-icon lucide-square-pen"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z" /></svg> </h4>
                 <p className="text-on-secondary-fixed-variant font-body text-sm font-medium leading-relaxed">
                   {/**Fallback tips */}
@@ -1232,7 +1301,7 @@ function App() {
           <AnimatedDivider marginClass="mt-8" />
 
           {/* ── Footer ── */}
-          {mobileNavEnabled ? <div className='mb-[68px]'></div> : (<footer className=" w-full flex flex-col">
+          {mobileNavEnabled ? <div className='mb-17'></div> : (<footer className=" w-full flex flex-col">
             {/* Layers 1 and 2 container */}
             <div
               className={`w-full relative ${footerBgEnabled ? '' : 'bg-surface-container-low'}`}
@@ -1248,10 +1317,10 @@ function App() {
                 }} />
               )}
 
-              <div className="relative z-10 flex flex-col w-full px-10 pt-12 pb-8 max-w-[1440px] mx-auto gap-8">
+              <div className="relative z-10 flex flex-col w-full px-10 pt-12 pb-8 max-w-360 mx-auto gap-8">
                 {/* Layer 1 */}
                 <div className="flex flex-col md:flex-row justify-between items-center gap-6 md:gap-0 pb-6"> {/*border-b border-outline-variant/10 */}
-                  <span className="text-2xl font-extrabold text-on-surface tracking-tight font-headline"><span className='bigbesty'>Sudoku </span>
+                  <span className="text-2xl font-extrabold text-on-surface tracking-tight font-headline"><span className='bigbesty text-navtx'>Sudoku </span>
                     <span className="text-[#ff0099] bigbesty">
                       Sanctuary
                     </span></span>
@@ -1297,7 +1366,7 @@ function App() {
                     </a>
 
                     <a
-                      href="https://linkedin.com"
+                      href="https://www.linkedin.com/in/abhi-yadav-95b448252/"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center hover:bg-primary/10 group transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-md"
@@ -1306,7 +1375,7 @@ function App() {
                     </a>
 
                     <a
-                      href="https://instagram.com"
+                      href="https://www.instagram.com/abhi_yadav_ji73/"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center hover:bg-primary/10 group transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-md"
@@ -1321,7 +1390,7 @@ function App() {
 
             {/* Layer 3 - always dark mode */}
             <div className="w-full bg-[#191c1e] text-white py-2 border-t border-white/10">
-              <div className="flex justify-center w-full px-10 max-w-[1440px] mx-auto">
+              <div className="flex justify-center w-full px-10 max-w-360 mx-auto">
                 <span className="text-xs font-medium text-white/80 font-headline text-center">© {new Date().getFullYear()} Mindgames Sanctuary. All Rights Reserved.</span>
               </div>
             </div>

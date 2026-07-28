@@ -49,7 +49,7 @@ export default function Settings({ theme, onThemeChange, mistakeLimitEnabled, on
       style={{ background: 'rgba(25, 28, 30, 0.6)', backdropFilter: 'blur(6px)' }}
       onClick={e => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-surface-container-low w-full max-w-md rounded-4xl shadow-[0_40px_80px_rgba(25,28,30,0.2)] overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="bg-surface-container-low w-full max-w-md rounded-2xl shadow-[0_40px_80px_rgba(25,28,30,0.2)] overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="flex items-center justify-between px-8 pt-8 pb-6 shrink-0">
           <div className="flex items-center justify-center gap-2">
@@ -418,18 +418,18 @@ export default function Settings({ theme, onThemeChange, mistakeLimitEnabled, on
             {/*Socials */}
             <div className="flex flex-col items-center justify-center">
               <div className="flex justify-center pt-4 pb-1 md:justify-end gap-6">
-                <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center hover:bg-primary/10 group transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-md">
+                <a href="https://github.com/Abhiyadav73" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center hover:bg-primary/10 group transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-md">
                   <img src="/github.png" alt="GitHub" className="w-5 h-5 opacity-70 group-hover:opacity-100 transition-opacity" />
                 </a>
-                <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center hover:bg-primary/10 group transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-md">
+                <a href="https://linkedin.com/in/abhi-yadav-95b448252/" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center hover:bg-primary/10 group transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-md">
                   <img src="/linkedin.png" alt="LinkedIn" className="w-5 h-5 opacity-70 group-hover:opacity-100 transition-opacity" />
                 </a>
-                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center hover:bg-primary/10 group transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-md">
+                <a href="https://instagram.com/abhi_yadav_ji73/" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center hover:bg-primary/10 group transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-md">
                   <img src="/insta-512.png" alt="Instagram" className="w-5 h-5 opacity-70 group-hover:opacity-100 transition-opacity" />
                 </a>
               </div>
             </div>
-            <p className="text-center p-4 text-xs text-on-surface-variant tracking-wider text-[rgb(112, 112, 112)]">&#169; Mindgame Sanctuary v1.3.3</p>
+            <p className="text-center p-4 text-xs text-on-surface-variant tracking-wider text-[rgb(112, 112, 112)]">&#169; Mindgame Sanctuary v1.4.4</p>
           </div>
         </div>
       </div>

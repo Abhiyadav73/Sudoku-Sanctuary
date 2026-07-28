@@ -1,14 +1,14 @@
 interface Props {
-    footerBgEnabled?: boolean;
-    isDark?: boolean;
-    onShowTerms: () => void;
-    onShowPrivacy: () => void;
+  footerBgEnabled?: boolean;
+  isDark?: boolean;
+  onShowTerms: () => void;
+  onShowPrivacy: () => void;
 }
 
-export default function Footer({footerBgEnabled, isDark, onShowTerms, onShowPrivacy}: Props) {
+export default function Footer({ footerBgEnabled, isDark, onShowTerms, onShowPrivacy }: Props) {
   return (
     <>
-    <footer className="w-full flex flex-col mt-auto border-t border-outline-variant/10 border-b-2 border-b-gray-200"> 
+      <footer className="w-full flex flex-col mt-auto border-t border-outline-variant/10 border-b-2 border-b-gray-200">
         <div
           className={`w-full relative ${footerBgEnabled ? '' : 'bg-surface-container-low'}`}
           style={footerBgEnabled ? {
@@ -24,7 +24,10 @@ export default function Footer({footerBgEnabled, isDark, onShowTerms, onShowPriv
           )}
           <div className="relative z-10 flex flex-col md:flex-row justify-between items-center md:items-end px-10 py-12 w-full max-w-7xl mx-auto gap-6">
             <div className="flex flex-col items-center md:items-start gap-2">
-              <div className="text-2xl font-headline font-bold text-on-surface"><span className='bigbesty'>Sudoku Sanctuary</span></div>
+              <div className="text-2xl font-headline font-bold text-on-surface">
+                <span className='bigbesty text-navtx'>Sudoku </span>
+                <span className="text-[#ff0099] bigbesty">Sanctuary</span>
+              </div>
               <p className="font-body text-label-md text-on-surface-variant tracking-wide text-center md:text-left text-sm ">
                 © {new Date().getFullYear()} Mindgames Sanctuary.All Rights Reserved.
               </p>
@@ -38,12 +41,14 @@ export default function Footer({footerBgEnabled, isDark, onShowTerms, onShowPriv
             Made with ❤️ in India | Enjoy 😊
           </div>
         </div>
-        <div className="w-full h-3" style={{
-          backgroundImage:'url(footerPattern.png)',
+        <div className="w-full h-4" style={{
+          backgroundImage: 'url(footerPattern.png)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
+          WebkitMaskImage:"linear-gradient(to bottom, transparent 0%, black 35%, black 100%)",
+          maskImage:"linear-gradient(to bottom, transparent 0%, black 35%, black 100%)",
         }}></div>
       </footer>
-      </>
+    </>
   )
 }

@@ -115,7 +115,7 @@ const Card = ({ name = "Alex", score = 1050, time = 45, mode = "Hard Mode" }) =>
 
           <div className="text-center w-full my-2">
             <h1 className="text-2xl font-black tracking-tight text-white drop-shadow-sm mb-1">{name}</h1>
-            <div className="h-[2px] w-0 bg-linear-to-r from-transparent via-indigo-500 to-transparent mx-auto my-3 animate-[growLine_1s_1.2s_ease-out_both]" />
+            <div className="h-0.5 w-0 bg-linear-to-r from-transparent via-indigo-500 to-transparent mx-auto my-3 animate-[growLine_1s_1.2s_ease-out_both]" />
 
             <h2 className="text-4xl font-extrabold bg-linear-to-r from-indigo-200 via-purple-300 to-pink-200 bg-clip-text text-transparent tracking-tight">
               {score.toLocaleString()} <span className="text-sm font-light text-slate-400">pts</span>

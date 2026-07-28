@@ -9,6 +9,7 @@ html,body{
 /* ─── Light mode CSS variables (default) ─── */
 :root {
   --color-primary: #3525cd;
+  --color-navtx: #3525cd; 
   --color-on-primary: #ffffff;
   --color-primary-container: #4f46e5;
   --color-on-primary-container: #dad7ff;
@@ -71,6 +72,7 @@ html,body{
 /* ─── Dark mode CSS variables ─── */
 .dark {
   --color-primary: #c3c0ff;
+  --color-navtx: #ffffff; 
   --color-on-primary: #1b0099;
   --color-primary-container: #3523c8;
   --color-on-primary-container: #dad7ff;

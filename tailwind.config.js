@@ -11,6 +11,7 @@ export default {
         // All colors now reference CSS variables so dark mode overrides work
         "error-container": "var(--color-error-container)",
         "primary": "var(--color-primary)",
+        "navtx": "var(--color-navtx)",
         "surface-container-highest": "var(--color-surface-container-highest)",
         "primary-fixed-dim": "var(--color-primary-fixed-dim)",
         "background": "var(--color-background)",
@@ -100,10 +101,17 @@ export default {
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
         pulseColor: {
-          '0%, 100%': { color: '#9FA1FF' }, 
+          '0%, 100%': { color: '#9FA1FF' },
           '50%': { color: '#249E94' },
         },
-      }
+      },
+      safelist: [
+        "bg-green-500",
+        "bg-yellow-500",
+        "bg-red-500",
+        "bg-blue-500",
+        "text-black",
+      ]
     },
   },
   plugins: [],

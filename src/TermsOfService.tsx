@@ -16,7 +16,6 @@ interface Props {
 }
 
 export default function TermsOfService({ onClose, onShowHowToPlay, onShowStats, onShowSettings, onShowTerms, onShowPrivacy, footerBgEnabled, isDark }: Props) {
-  // Prevent scrolling on the main page when this is open
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     return () => {
@@ -60,7 +59,7 @@ export default function TermsOfService({ onClose, onShowHowToPlay, onShowStats, 
               <h2 className="font-headline text-2xl font-bold text-on-surface tracking-tight">Acceptance of Terms</h2>
 
               {/* OUTER CONTAINER: Handles the spinning border size & radius */}
-              <div className="p-[3px] rounded-xl overflow-hidden shadow-[0_20px_40px_rgba(25,28,30,0.06)]">
+              <div className="p-0.75 rounded-xl overflow-hidden shadow-[0_20px_40px_rgba(25,28,30,0.06)]">
 
                 {/* INNER CONTAINER: Solid background blocks the gradient from showing inside */}
                 <div className="bg-surface-container-lowest p-8 rounded-[10px] w-full h-full relative z-10 space-y-4">

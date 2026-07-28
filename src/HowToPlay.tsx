@@ -11,9 +11,10 @@ interface Props {
   onShowTerms: () => void;
   footerBgEnabled: boolean;
   isDark: boolean;
+  appBgEnabled: boolean;
 }
 
-export default function HowToPlay({ onClose, onShowLeaderboard, onShowStats, onShowSettings, onShowPrivacy, onShowTerms, footerBgEnabled, isDark }: Props) {
+export default function HowToPlay({ onClose, onShowLeaderboard, onShowStats, onShowSettings, onShowPrivacy, onShowTerms, footerBgEnabled, isDark, appBgEnabled }: Props) {
   const [activeSection, setActiveSection] = useState('basics');
 
   useEffect(() => {
@@ -49,25 +50,26 @@ export default function HowToPlay({ onClose, onShowLeaderboard, onShowStats, onS
   return (
     <div className="fixed inset-0 z-100 bg-surface overflow-y-auto overflow-x-hidden font-body text-on-surface selection:bg-primary-fixed selection:text-on-primary-fixed-variant flex flex-col">
       {/* TopAppBar */}
-      <header className="bg-surface/90 backdrop-blur-md full-width top-0 z-50 sticky shadow-sm">
-        <Indicator/>
-        <div className="flex justify-between items-center px-10 py-6 w-full max-w-[1440px] mx-auto">
+      <header className="bg-surface/20 backdrop-blur-md full-width top-0 z-50 sticky shadow-sm">
+        <Indicator />
+        <div className="flex justify-between items-center px-10 py-6 w-full max-w-360 mx-auto">
           <div className="flex items-center gap-6">
-            <button 
+            <button
               onClick={onClose}
               className="text-primary hover:bg-surface-variant/50 transition-colors duration-300 p-2 rounded-full scale-95 active:scale-90"
             >
-              <span className="material-symbols-outlined pt-[8px]">arrow_back</span>
+              <span className="material-symbols-outlined pt-2">arrow_back</span>
             </button>
-            <h1 className="font-headline text-2xl font-extrabold text-primary tracking-tight"> <span className='bigbesty'>Sudoku Sanctuary</span></h1>
+            <h1 className="font-headline text-2xl font-extrabold text-primary tracking-tight"> <span className='bigbesty text-navtx'>Sudoku </span>
+              <span className="text-[#ff0099] bigbesty">Sanctuary</span></h1>
           </div>
           <div className="flex items-center gap-4">
             <nav className="hidden md:flex items-center gap-8 mr-4">
               <button onClick={onClose} className="nav-link-underline text-on-surface-variant font-label text-sm tracking-wider hover:text-primary transition-colors duration-300"><span className='titillium-web-regular text-lg font-semibold'>Play</span></button>
               <button onClick={onShowStats} className="nav-link-underline text-on-surface-variant font-label text-sm tracking-wider hover:text-primary transition-colors duration-300"><span className='titillium-web-regular text-lg font-semibold'>Stats</span></button>
-            </nav> 
-            <button 
-              onClick={onShowSettings} 
+            </nav>
+            <button
+              onClick={onShowSettings}
               className="material-symbols-outlined text-on-surface-variant hover:text-primary hover:bg-surface-container-highest p-2.5 rounded-full transition-all duration-300 scale-95 active:scale-90 hover:rotate-90"
             >
               settings
@@ -76,11 +78,27 @@ export default function HowToPlay({ onClose, onShowLeaderboard, onShowStats, onS
         </div>
       </header>
 
-      <main className="max-w-[1440px] mx-auto px-6 md:px-10 py-12 flex flex-col md:flex-row gap-16 flex-1 w-full">
+      <main className={`max-w-360 mx-auto px-6 md:px-10 py-12 flex flex-col md:flex-row gap-16 flex-1 w-full ${appBgEnabled ? "" : "bg-surface"}`}>
+        {appBgEnabled && (
+          <>
+            <div className="fixed inset-0 bg-surface z-[-2]" />
+            <div
+              className="fixed inset-0 pointer-events-none z-[-1]"
+              style={{
+                backgroundImage: `url('${isDark ? "/dotted-dark.jpeg" : "/dotted.png"
+                  }')`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                opacity: isDark ? 0.9 : 0.17,
+                mixBlendMode: isDark ? "screen" : "multiply",
+              }}
+            />
+          </>
+        )}
         {/* Sidebar Navigation */}
         <aside className="w-full md:w-64 shrink-0">
-          <div className="sticky top-32">
-            <h2 className="font-headline text-3xl font-extrabold tracking-tight text-primary mb-8">How to Play</h2>
+          <div className="sticky top-32 bg-surface/20 backdrop-blur-md px-2 rounded-4xl ">
+            <h2 className="font-headline text-3xl font-extrabold text-primary mb-8 titillium-web-bold">How to Play</h2>
             <nav className="flex flex-col gap-2">
               <a className={getTabClass('basics')} href="#basics">
                 <span className="material-symbols-outlined">grid_3x3</span>
@@ -114,7 +132,7 @@ export default function HowToPlay({ onClose, onShowLeaderboard, onShowStats, onS
                 Sudoku is played on a 9x9 grid, divided into nine 3x3 subgrids. The objective is simple yet requires deep concentration: every row, every column, and every subgrid must contain the numbers 1 through 9 exactly once.
               </p>
             </div>
-            
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div className="bg-surface-container-lowest p-8 rounded-4xl shadow-[0_20px_40px_rgba(25,28,30,0.06)] aspect-square max-w-md mx-auto lg:mx-0 w-full flex flex-col">
                 {/* Illustrative Grid Diagram */}
@@ -215,7 +233,7 @@ export default function HowToPlay({ onClose, onShowLeaderboard, onShowStats, onS
                 Interface with the grid using our minimalist control suite. These tools are designed to facilitate thinking, not replace it.
               </p>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Control Card: Difficulty */}
               <div className="bg-surface-container-low p-8 rounded-4xl hover:bg-surface-container-high transition-colors duration-300">
@@ -250,14 +268,22 @@ export default function HowToPlay({ onClose, onShowLeaderboard, onShowStats, onS
                 <p className="text-sm text-on-surface-variant leading-relaxed">Toggle pencil marks to track possible candidates for each cell.</p>
               </div>
               {/* Control Card: Hint */}
-              <div className="bg-surface-container-low p-8 rounded-4xl hover:bg-surface-container-high transition-colors duration-300 lg:col-span-2">
+              <div className="bg-surface-container-low p-8 rounded-4xl hover:bg-surface-container-high transition-colors duration-300 ">
                 <div className="w-12 h-12 rounded-2xl bg-surface-container-highest text-on-surface flex items-center justify-center mb-6">
                   <span className="material-symbols-outlined">lightbulb</span>
                 </div>
                 <h4 className="font-headline text-xl font-bold mb-3 text-on-surface">Hint</h4>
                 <p className="text-sm text-on-surface-variant leading-relaxed max-w-lg">Feeling stuck? A hint will reveal one logical next step without giving away the game.</p>
               </div>
-            </div>
+              {/* control card: Reset */}
+              <div className="bg-surface-container-low p-8 rounded-4xl hover:bg-surface-container-high transition-colors duration-300">
+                <div className="w-12 h-12 rounded-2xl bg-error text-on-error flex items-center justify-center mb-6 shadow-[0_8px_16px_rgba(239,83,80,0.25)]">
+                  <span className="material-symbols-outlined">restart_alt</span>
+                </div>
+                <h4 className="font-headline text-xl font-bold mb-3 text-on-surface">Reset</h4>
+                <p className="text-sm text-on-surface-variant leading-relaxed max-w-lg">Clear the board and start fresh current game.</p>
+              </div>
+            </div> 
           </section>
 
           {/* Section 3: Solving Techniques */}
@@ -266,7 +292,7 @@ export default function HowToPlay({ onClose, onShowLeaderboard, onShowStats, onS
               <span className="font-label text-sm font-bold tracking-widest uppercase text-primary mb-2 block">Step Three</span>
               <h2 className="font-headline text-4xl font-extrabold text-on-surface mb-6">Solving Techniques</h2>
             </div>
-            
+
             <div className="space-y-16">
               {/* Technique 1 */}
               <div className="flex flex-col lg:flex-row gap-12 items-center">
@@ -277,14 +303,14 @@ export default function HowToPlay({ onClose, onShowLeaderboard, onShowStats, onS
                   </p>
                 </div>
                 <div className="lg:w-1/2 bg-surface-container-low p-8 rounded-[2.5rem] w-full">
-                  <img 
-                    alt="Scanning Technique" 
-                    className="w-full h-64 object-cover rounded-3xl shadow-[0_20px_40px_rgba(25,28,30,0.06)]" 
+                  <img
+                    alt="Scanning Technique"
+                    className="w-full h-64 object-cover rounded-3xl shadow-[0_20px_40px_rgba(25,28,30,0.06)]"
                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQvhGFRpn24Ma96oOKJonuLZWvytkKvIJgG3yi9FiZlxjHkRRw9RapAjN-wLT9hkfnRXMV-kigkuGA5eCLILLBGCcySJsUKO3luZS-V1Hyl5VKScdkpAlo8ns9w7CjU-cIX9lMjvx0m92JgAOXcoR8MWkDZ-DqmSDrSXWWVB71UD-Ska_punfGJBsRkcdtMzqZWNLnunWcW5SLL4vGN1eWeJHbfpWNEM3uapOUzD05j8npDC6465FwzAvco42NMpOJKF-6jZNkGVBS"
                   />
                 </div>
               </div>
-              
+
               {/* Technique 2 */}
               <div className="flex flex-col lg:flex-row-reverse gap-12 items-center">
                 <div className="lg:w-1/2">
@@ -316,7 +342,7 @@ export default function HowToPlay({ onClose, onShowLeaderboard, onShowStats, onS
               <div className="relative z-10 flex flex-col items-center">
                 <h2 className="font-headline text-4xl font-extrabold text-on-primary mb-6">Ready to test your logic?</h2>
                 <p className="text-on-primary-container mb-10 max-w-lg mx-auto text-lg">Apply these techniques and find your flow state in a new game.</p>
-                <button 
+                <button
                   onClick={onClose}
                   className="bg-surface-container-lowest text-primary px-12 py-5 rounded-full font-label font-bold text-base tracking-wider uppercase hover:scale-105 active:scale-95 transition-all duration-300 shadow-xl"
                 >
@@ -328,12 +354,12 @@ export default function HowToPlay({ onClose, onShowLeaderboard, onShowStats, onS
         </div>
       </main>
 
-      <AnimatedDivider marginClass="mt-0"/> 
+      <AnimatedDivider marginClass="mt-0" />
 
       {/* ── Footer ── */}
       <footer className="mt-auto w-full flex flex-col">
         {/* Layers 1 and 2 container */}
-        <div 
+        <div
           className={`w-full relative ${footerBgEnabled ? '' : 'bg-surface-container-low'}`}
           style={footerBgEnabled ? {
             backgroundImage: `url('${isDark ? '/footer-dark.gif' : '/footer-lite.jpg'}')`,
@@ -346,11 +372,13 @@ export default function HowToPlay({ onClose, onShowLeaderboard, onShowStats, onS
               background: isDark ? 'linear-gradient(to bottom, rgba(25,28,30,0.8), rgba(25,28,30,0.95))' : 'linear-gradient(to bottom, rgba(255,255,255,0.8), rgba(255,255,255,0.95))'
             }} />
           )}
-          
-          <div className="relative z-10 flex flex-col w-full px-10 pt-12 pb-8 max-w-[1440px] mx-auto gap-8">
+
+          <div className="relative z-10 flex flex-col w-full px-10 pt-12 pb-8 max-w-360 mx-auto gap-8">
             {/* Layer 1 */}
             <div className="flex flex-col md:flex-row justify-between items-center gap-6 md:gap-0 pb-6 border-b border-outline-variant/10">
-              <span className="text-2xl font-extrabold text-on-surface tracking-tight font-headline">Sudoku Sanctuary</span>
+              <span className="text-2xl font-extrabold text-on-surface tracking-tight font-headline">
+                <span className='bigbesty text-navtx'>Sudoku </span>
+                <span className="text-[#ff0099] bigbesty">Sanctuary</span></span>
               <div className="flex flex-wrap justify-center gap-10">
                 <button onClick={onShowPrivacy} className="font-label text-sm text-on-surface-variant hover:text-primary transition-colors duration-300 cursor-pointer">Privacy Policy</button>
                 <button onClick={onShowTerms} className="font-label text-sm text-on-surface-variant hover:text-primary transition-colors duration-300 cursor-pointer">Terms of Service</button>
@@ -368,13 +396,13 @@ export default function HowToPlay({ onClose, onShowLeaderboard, onShowStats, onS
 
             {/* Layer 2 */}
             <div className="flex justify-center md:justify-end gap-6">
-              <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center hover:bg-primary/10 group transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-md">
+              <a href="https://github.com/Abhiyadav73" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center hover:bg-primary/10 group transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-md">
                 <img src="/github.png" alt="GitHub" className="w-5 h-5 opacity-70 group-hover:opacity-100 transition-opacity" />
               </a>
-              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center hover:bg-primary/10 group transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-md">
+              <a href="https://linkedin.com/in/abhi-yadav-95b448252/" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center hover:bg-primary/10 group transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-md">
                 <img src="/linkedin.png" alt="LinkedIn" className="w-5 h-5 opacity-70 group-hover:opacity-100 transition-opacity" />
               </a>
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center hover:bg-primary/10 group transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-md">
+              <a href="https://instagram.com/abhi_yadav_ji73/" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center hover:bg-primary/10 group transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-md">
                 <img src="/insta-512.png" alt="Instagram" className="w-5 h-5 opacity-70 group-hover:opacity-100 transition-opacity" />
               </a>
             </div>
@@ -383,7 +411,7 @@ export default function HowToPlay({ onClose, onShowLeaderboard, onShowStats, onS
 
         {/* Layer 3 - always dark mode */}
         <div className="w-full bg-[#191c1e] text-white py-4 border-t border-white/10">
-          <div className="flex justify-center w-full px-10 max-w-[1440px] mx-auto">
+          <div className="flex justify-center w-full px-10 max-w-360 mx-auto">
             <span className="text-xs font-medium text-white/80 font-headline text-center">© {new Date().getFullYear()} Mindgames Sanctuary. All Rights Reserved.</span>
           </div>
         </div>
