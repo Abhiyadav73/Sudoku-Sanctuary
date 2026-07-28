@@ -101,7 +101,7 @@ export default function Leaderboard({ entries, onClose, onClear }: Props) {
 
           const totalEntries = modeData.reduce((acc, item) => acc + item.count, 0);
 
-          const modeDotColor = {
+          const modeDotColor: Record<string, string> = {
             easy: 'bg-emerald-500',
             medium: 'bg-amber-500',
             hard: 'bg-rose-500',
