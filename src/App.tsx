@@ -30,9 +30,9 @@ import {
   clearGameProgress,
   isDailyChallengeCompleted,
   markDailyChallengeCompleted,
+  getPuzzleStatistics
 } from './useDynamicPuzzle';
 import React from 'react';
-
 
 function App() {
   const {
@@ -51,6 +51,19 @@ function App() {
     stopGame,
     restartPuzzle
   } = useSudoku();
+
+  const puzzleStats = React.useMemo(
+    () => getPuzzleStatistics(state.board),
+    [state.board]
+  );
+
+  /*React.useEffect(() => {
+    console.log("Puzzle Statistics:", puzzleStats.emptyCells);
+    console.log("Selected number:",puzzleStats.numberCount,1)
+    console.log("Selected number:",puzzleStats)
+  }, [puzzleStats.emptyCells]);*/
+
+
 
   const { theme, setTheme } = useTheme();
 
@@ -78,14 +91,14 @@ function App() {
     if (!currentPuzzleId) return;
     try {
       localStorage.setItem(`sudoku-reset-${currentPuzzleId}`, String(resetCount));
-    } catch {}
+    } catch { }
   }, [resetCount, currentPuzzleId]);
 
   useEffect(() => {
     if (!currentPuzzleId) return;
     try {
       localStorage.setItem(`sudoku-hint-${currentPuzzleId}`, String(hintUsed));
-    } catch {}
+    } catch { }
   }, [hintUsed, currentPuzzleId]);
 
   useEffect(() => {
@@ -386,7 +399,7 @@ function App() {
     const diff = state.difficulty;
     addEntry(playerName, diff, state.timeElapsed, pointsActive ? finalScore : 0);
     recordWin(diff);
-    
+
     clearGameProgress(diff);
     setShowCompletionModal(false);
     setPlayerName('');
@@ -474,17 +487,40 @@ function App() {
   };
 
   const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-  const boardbg = ["sudBod2.png", "SudokuBoard.jpeg", "sudboard3.png","sudboard4.png"]
+  const boardbg = ["sudBod2.png", "SudokuBoard.jpeg", "sudboard3.png", "sudboard4.png"]
 
   const [bgImage] = useState(
     () => boardbg[Math.floor(Math.random() * boardbg.length)]
   );
 
+  const [fullViewToggle, setFullViewToggle] = useState(false);
+
+  const toggleFullView = () => {
+    setFullViewToggle((prev) => !prev);
+  };
+
+  // ── Responsive breakpoint: mobile & tablet (< 1024px) ─────────────────────
+  const [isMobileOrTablet, setIsMobileOrTablet] = useState(
+    window.innerWidth < 1024
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobileOrTablet(window.innerWidth < 1024);
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <>
       {isLoading && <LoadingSpinner />}
-      {trailEnabled && <CircularTrail />}
+      {trailEnabled && !isMobileOrTablet && <CircularTrail />}
 
       {/* ── Global floating point labels (portal-style, fixed position) ── */}
       {floatingPoints.map((fp: FloatingPoint) => (
@@ -498,7 +534,6 @@ function App() {
       ))}
 
       {/*Routes*/}
-
 
       {/* ── Modals ── */}
       <AnimatePresence>
@@ -551,7 +586,7 @@ function App() {
                 handleDailyChallenge();
               }}
             />
-          </PageTransition> 
+          </PageTransition>
         )}
         {showTerms && (
           <PageTransition key="terms" className="fixed inset-0 z-100">
@@ -803,61 +838,68 @@ function App() {
             </>
           )}
           {/* ── Top Navigation Bar ── */}
-          <Indicator />
-          <header className="bg-surface/20 backdrop-blur-lg top-0 z-51 fixed w-full ">
-            <div className="flex justify-between items-center w-full px-4 sm:px-10 py-4 sm:py-6 max-w-360 mx-auto">
-              <div className="flex items-center gap-4 sm:gap-12">
-                <div className="flex item-stretch gap-2 font-headline">
-                  {/* The vertical bar */}
-                  <div className=" hidden w-1.5 bg-[#ff0099] rounded-full shrink-0" />
+          {fullViewToggle ? <div></div> : (<>
+            <Indicator />
+            <header className="bg-surface/20 backdrop-blur-lg top-0 z-51 fixed w-full ">
+              <div className="flex justify-between items-center w-full px-4 sm:px-10 py-4 sm:py-6 max-w-360 mx-auto">
+                <div className="flex items-center gap-4 sm:gap-12">
+                  <div className="flex item-stretch gap-2 font-headline">
+                    {/* The vertical bar */}
+                    <div className=" hidden w-1.5 bg-[#ff0099] rounded-full shrink-0" />
 
-                  <div className="flex flex-col sm:flex-row sm:items-baseline gap-0 sm:gap-1.5 text-xl sm:text-2xl font-extrabold tracking-tight">
-                    <span className="bigbesty text-navtx">Sudoku</span> 
-                    <span className="text-[#ff0099]  sm:text-2xl bigbesty">
-                      Sanctuary 
+                    <div className="flex flex-col sm:flex-row sm:items-baseline gap-0 sm:gap-1.5 text-xl sm:text-2xl font-extrabold tracking-tight">
+                      <span className="bigbesty text-navtx">Sudoku</span>
+                      <span className="text-[#ff0099]  sm:text-2xl bigbesty">
+                        Sanctuary
+                      </span>
+                      {/*<h1 className="bigbesty sm:text-2xl">
+                        <span className="text-[#FF9933]">Sud</span>
+                        <span className="text-white">oku</span>{" "}
+                        <span className="text-[#138808]">Sanctuary</span>
+                      </h1>*/}
+
+                    </div>
+                  </div>
+                  <nav className="hidden lg:flex gap-8">
+                    {/* <a className="text-primary font-bold font-label text-sm tracking-[0.05em] uppercase" href="#">Play</a> */}
+                    <button
+                      onClick={() => setShowStats(true)}
+                      className="nav-link-underline text-on-surface-variant font-label text-sm tracking-wider hover:text-primary transition-colors duration-300 cursor-pointer"
+                    >
+                      <span className='titillium-web-regular text-lg font-semibold'>Stats</span>
+                    </button>
+
+                    <button
+                      onClick={() => setShowHowToPlay(true)}
+                      className="nav-link-underline text-on-surface-variant font-label text-sm tracking-wider hover:text-primary transition-colors duration-300 cursor-pointer"
+                    >
+                      <span className='titillium-web-regular text-lg font-semibold'>How to Play <big>?</big></span>
+                    </button>
+
+
+                  </nav>
+                </div>
+                <div className="flex items-center gap-2 sm:gap-6">
+                  <button
+                    onClick={() => { buttonClick(); setShowLeaderboard(true); }}
+                    className="hidden sm:block material-symbols-outlined text-on-surface-variant hover:text-primary hover:bg-surface-container-highest p-1.5 sm:p-2.5 rounded-full transition-all duration-300 scale-95 active:scale-90 cursor-pointer hover:animate-shakeTrophy"
+                  >
+                    emoji_events
+                  </button>
+                  <button
+                    onClick={() => { buttonClick(); setShowSettings(true); }}
+                    className="hidden sm:block material-symbols-outlined text-on-surface-variant hover:text-primary hover:bg-surface-container-highest p-1.5 sm:p-2.5 rounded-full transition-all duration-300 scale-95 hover:rotate-90 active:scale-90 cursor-pointer"
+                    title="Settings"
+                  >
+                    settings
+                  </button>
+                  <div className=" hidden  flex-col items-center">
+                    <span className="text-lg font-bold text-primary">
+                      🔥 {currentStreak}
                     </span>
                   </div>
-                </div>
-                <nav className="hidden lg:flex gap-8">
-                  {/* <a className="text-primary font-bold font-label text-sm tracking-[0.05em] uppercase" href="#">Play</a> */}
-                  <button
-                    onClick={() => setShowStats(true)}
-                    className="nav-link-underline text-on-surface-variant font-label text-sm tracking-wider hover:text-primary transition-colors duration-300 cursor-pointer"
-                  >
-                    <span className='titillium-web-regular text-lg font-semibold'>Stats</span>
-                  </button>
 
-                  <button
-                    onClick={() => setShowHowToPlay(true)}
-                    className="nav-link-underline text-on-surface-variant font-label text-sm tracking-wider hover:text-primary transition-colors duration-300 cursor-pointer"
-                  >
-                    <span className='titillium-web-regular text-lg font-semibold'>How to Play <big>?</big></span>
-                  </button>
-
-
-                </nav>
-              </div>
-              <div className="flex items-center gap-2 sm:gap-6">
-                <button
-                  onClick={() => { buttonClick(); setShowLeaderboard(true); }}
-                  className="hidden sm:block material-symbols-outlined text-on-surface-variant hover:text-primary hover:bg-surface-container-highest p-1.5 sm:p-2.5 rounded-full transition-all duration-300 scale-95 active:scale-90 cursor-pointer hover:animate-shakeTrophy"
-                >
-                  emoji_events
-                </button>
-                <button
-                  onClick={() => { buttonClick(); setShowSettings(true); }}
-                  className="hidden sm:block material-symbols-outlined text-on-surface-variant hover:text-primary hover:bg-surface-container-highest p-1.5 sm:p-2.5 rounded-full transition-all duration-300 scale-95 hover:rotate-90 active:scale-90 cursor-pointer"
-                  title="Settings"
-                >
-                  settings
-                </button>
-                <div className=" hidden  flex-col items-center">
-                  <span className="text-lg font-bold text-primary">
-                    🔥 {currentStreak}
-                  </span>
-                </div>
-
-                {/*<button
+                  {/*<button
                   onClick={toggleFullScreen}
                   className=" hidden sm:block material-symbols-outlined text-on-surface-variant hover:text-primary hover:bg-surface-container-highest p-1.5 sm:p-2.5 rounded-full transition-all duration-300 scale-95 active:scale-90 cursor-pointer"
                   title={isFullscreen ? 'Exit Full Screen (f)' : 'Full Screen (f)'}
@@ -871,22 +913,24 @@ function App() {
                 >
                   New Game
                 </button>*/}
-                <button
-                  onClick={() => {
-                    buttonClick();
-                    handleGenerateBoard(state.difficulty);
-                  }}
-                  className="outline-none appearance-none inline-flex transition-all duration-400 items-center justify-between min-w-30 sm:min-w-50 rounded-md bg-linear-to-r from-[#3525cd] to-[#dad7ff] px-3 sm:px-5 py-2 sm:py-4 text-white text-[12px] sm:text-[14px] font-semibold uppercase tracking-[1.2px] shadow-[0_4px_12px_rgba(0,0,0,0.1)] overflow-hidden hover:opacity-95 hover:from-green-500 hover:to-green-300" 
-                >
-                  <span className="inline-block animate-ripple" />
-                  <span>New Game</span>
-                  <span className="size-0" />
-                </button>
+                  <button
+                    onClick={() => {
+                      buttonClick();
+                      handleGenerateBoard(state.difficulty);
+                    }}
+                    className="outline-none appearance-none inline-flex transition-all duration-400 items-center justify-between min-w-30 sm:min-w-50 rounded-md bg-linear-to-r from-[#3525cd] to-[#dad7ff] px-3 sm:px-5 py-2 sm:py-4 text-white text-[12px] sm:text-[14px] font-semibold uppercase tracking-[1.2px] shadow-[0_4px_12px_rgba(0,0,0,0.1)] overflow-hidden hover:opacity-95 hover:from-green-500 hover:to-green-300"
+                  >
+                    <span className="inline-block animate-ripple" />
+                    <span>New Game</span>
+                    <span className="size-0" />
+                  </button>
+                </div>
               </div>
-            </div>
-          </header>
+            </header>
+          </>
+          )}
 
-          <main className="flex-1 flex flex-col lg:flex-row max-w-360 mx-auto w-full pt-20 sm:pt-24 px-4 sm:px-6 md:px-10 md:mt-10 gap-6 sm:gap-10 mt-6">
+          <main className={`flex-1 flex flex-col lg:flex-row max-w-360 mx-auto w-full ${fullViewToggle ? "pt-0" : "pt-20"} sm:pt-24 px-4 sm:px-6 md:px-10 md:mt-10 gap-6 sm:gap-10 mt-6`}>
 
             {/* ── Left: Game Controls ── */}
             <aside className="hidden lg:flex flex-col gap-6 p-8 bg-surface-container-low w-72 shrink-0 h-fit rounded-4xl relative">
@@ -940,29 +984,33 @@ function App() {
                 <button
                   disabled={resetCount >= 1}
                   onClick={handleRestart}
-                  className={`font-label px-4 py-3 flex items-center gap-3 font-medium rounded-xl transition-all duration-300 ${
-                    resetCount >= 1
-                      ? 'text-on-surface-variant/30 bg-transparent cursor-not-allowed pointer-events-none'
-                      : 'text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface'
-                  }`}
+                  className={`font-label px-4 py-3 flex items-center gap-3 font-medium rounded-xl transition-all duration-300 ${resetCount >= 1
+                    ? 'text-on-surface-variant/30 bg-transparent cursor-not-allowed pointer-events-none'
+                    : 'text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface'
+                    }`}
                 >
                   <span className="material-symbols-outlined">refresh</span>
                   Reset ({1 - resetCount})
+                </button>
+
+                <button onClick={toggleFullView} className="text-on-surface-variant font-label px-4 py-3 flex items-center gap-3 font-medium hover:bg-surface-container-highest hover:text-on-surface rounded-xl transition-all duration-300">
+                  <span className="material-symbols-outlined">{fullViewToggle ? 'compress' : 'expand'}</span>
+                  {fullViewToggle ? 'Exit' : 'Full'} View (Beta)
                 </button>
               </div>
 
               <button
                 disabled={hintUsed >= 3}
                 onClick={handleHint}
-                className={`mt-4 w-full py-4 rounded-full font-label font-bold tracking-wider uppercase text-sm flex items-center justify-center gap-2 transition-all duration-300 ${
-                  hintUsed >= 3
-                    ? 'bg-surface-container-highest text-on-surface-variant/30 cursor-not-allowed pointer-events-none shadow-none'
-                    : 'bg-linear-to-r from-primary to-primary-container text-on-primary shadow-[0_8px_16px_rgba(53,37,205,0.2)] hover:shadow-[0_12px_24px_rgba(53,37,205,0.3)] active:scale-95'
-                }`}
+                className={`mt-4 w-full py-4 rounded-full font-label font-bold tracking-wider uppercase text-sm flex items-center justify-center gap-2 transition-all duration-300 ${hintUsed >= 3
+                  ? 'bg-surface-container-highest text-on-surface-variant/30 cursor-not-allowed pointer-events-none shadow-none'
+                  : 'bg-linear-to-r from-primary to-primary-container text-on-primary shadow-[0_8px_16px_rgba(53,37,205,0.2)] hover:shadow-[0_12px_24px_rgba(53,37,205,0.3)] active:scale-95'
+                  }`}
               >
                 <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>lightbulb</span>
                 Hint ({3 - hintUsed})
               </button>
+
             </aside>
 
             {/* ── Centre: Grid ── */}
@@ -1018,6 +1066,14 @@ function App() {
                       </span>
                     </div>
                   )}
+                </div>
+
+                {/*Total Count*/}
+                <div className="flex flex-col items-center">
+                  <span className="text-on-surface-variant text-[10px] sm:text-xs font-bold uppercase tracking-widest mb-0 sm:mb-1">Total Count</span>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-2xl sm:text-3xl font-extrabold text-primary font-headline tabular-nums tracking-tighter">{81 - (puzzleStats.emptyCells)}/81</h3>
+                  </div>
                 </div>
 
                 {/* Timer + Score */}
@@ -1122,7 +1178,7 @@ function App() {
               </div>
 
               {/* Utility Action Buttons (Mobile only) */}
-              <div className="grid lg:hidden w-full max-w-150 grid-cols-5 gap-2 sm:gap-4 mt-6">
+              <div className="grid lg:hidden w-full max-w-150 grid-cols-6 gap-2 sm:gap-4 mt-6">
                 <button onClick={undo} className="flex flex-col items-center gap-1 group">
                   <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-xl bg-surface-container-high text-on-surface-variant group-active:scale-95 transition-all">
                     <span className="material-symbols-outlined">undo</span>
@@ -1143,32 +1199,52 @@ function App() {
                   <span className={`font-label text-[8px] sm:text-[10px] uppercase tracking-widest font-semibold ${state.notesMode ? 'text-primary' : 'text-outline'}`}>Notes</span>
                 </button>
                 <button
-                  disabled={hintUsed >= 3}
                   onClick={handleHint}
-                  className={`flex flex-col items-center gap-1 group transition-all duration-300 ${
-                    hintUsed >= 3 ? 'opacity-30 cursor-not-allowed pointer-events-none' : ''
-                  }`}
+                  disabled={hintUsed >= 3}
+                  className={`flex flex-col items-center gap-1 group ${hintUsed >= 3 ? 'opacity-30 cursor-not-allowed' : ''
+                    }`}
                 >
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-xl bg-surface-container-high text-on-surface-variant group-active:scale-95 transition-all">
+                  <div
+                    className={`w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-xl bg-surface-container-high ${hintUsed < 3 ? 'text-primary' : 'text-on-surface-variant'
+                      } group-active:scale-95 transition-all relative`}
+                  >
                     <span className="material-symbols-outlined">lightbulb</span>
+
+                    {hintUsed < 3 && (
+                      <span className="absolute top-0 sm:top-1 right-1 sm:right-2 text-[8px] font-bold text-primary">
+                        {3 - hintUsed}
+                      </span>
+                    )}
                   </div>
-                  <span className="font-label text-[8px] sm:text-[10px] uppercase tracking-widest font-semibold text-outline text-center truncate max-w-16">
-                    Hint ({3 - hintUsed})
+
+                  <span
+                    className={`font-label text-[8px] sm:text-[10px] uppercase tracking-widest font-semibold ${hintUsed < 3 ? 'text-primary' : 'text-outline'
+                      }`}
+                  >
+                    Hint
                   </span>
                 </button>
+
+
                 <button
                   disabled={resetCount >= 1}
                   onClick={handleRestart}
-                  className={`flex flex-col items-center gap-1 group transition-all duration-300 ${
-                    resetCount >= 1 ? 'opacity-30 cursor-not-allowed pointer-events-none' : ''
-                  }`}
+                  className={`flex flex-col items-center gap-1 group transition-all duration-300 ${resetCount >= 1 ? 'opacity-30 cursor-not-allowed pointer-events-none' : ''
+                    }`}
                 >
                   <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-xl bg-surface-container-high text-on-surface-variant group-active:scale-95 transition-all">
                     <span className="material-symbols-outlined">refresh</span>
                   </div>
                   <span className="font-label text-[8px] sm:text-[10px] uppercase tracking-widest font-semibold text-outline text-center truncate max-w-16">
                     Reset ({1 - resetCount})
-                  </span>
+                  </span> 
+                </button>
+
+                <button onClick={toggleFullView} className="flex flex-col items-center gap-1 group">
+                  <div className={`w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-xl bg-surface-container-high ${fullViewToggle ? 'text-primary' : 'text-on-surface-variant'} group-active:scale-95 transition-all relative`}>
+                    <span className="material-symbols-outlined">{fullViewToggle ? 'compress' : 'expand'}</span>
+                  </div>
+                  <span className={`font-label text-[8px] sm:text-[10px] uppercase tracking-widest font-semibold ${fullViewToggle ? 'text-primary' : 'text-outline'}`}>View</span>
                 </button>
               </div>
 
@@ -1184,12 +1260,10 @@ function App() {
                       disabled={isFullyPlaced}
                       onClick={e => {
                         if (isFullyPlaced) return;
-                        // Register point action BEFORE dispatching to useSudoku so we
-                        // can read the pre-change board state accurately.
                         if (state.selectedCell !== null && state.solution && !state.notesMode) {
                           const correctVal = parseInt(state.solution[state.selectedCell], 10);
                           const currentVal = state.board[state.selectedCell].value;
-                          // Only act when placing a new value (toggling same value off = no action)
+
                           if (num !== currentVal) {
                             if (num === correctVal) {
                               // registerAction updates score +15 AND shows the floating label
@@ -1205,11 +1279,12 @@ function App() {
                         }
                         inputNumber(num);
                       }}
-                      className={`aspect-square sm:h-14 flex items-center justify-center font-headline text-lg sm:text-xl font-medium rounded-lg sm:rounded-xl transition-all duration-300 border-[0.5px] sm:border-2 ${isFullyPlaced
+                      className={`aspect-square sm:h-14 flex items-center justify-center flex-col font-headline text-lg sm:text-xl font-medium rounded-lg sm:rounded-xl transition-all duration-300 border-[0.5px] sm:border-2 ${isFullyPlaced
                         ? 'bg-surface-container-highest/50 text-on-surface-variant/30 border-transparent cursor-default'
                         : 'bg-surface-container-high text-on-surface-variant border-primary/20 hover:bg-surface-container-highest active:scale-90'
                         }`}
                     >
+                      <span key={num} className={`font-label text-[8px] sm:text-[10px] uppercase tracking-widest font-semibold text-outline text-center truncate max-w-16 ${isFullyPlaced ? 'hidden' : 'block'}`}>{puzzleStats.numberCount[num]}/9</span>
                       {isFullyPlaced ? (
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-40">
                           <path d="m10 20-1.25-2.5L6 18" />
@@ -1231,6 +1306,7 @@ function App() {
                     </button>
                   );
                 })}
+
               </div>
 
               {/* Architectural Tip (Responsive View) */}
@@ -1250,13 +1326,13 @@ function App() {
                 <button
                   onClick={handleDailyChallenge}
                   className="w-full py-3 bg-(--color-surface-container-lowest) text-(--color-primary) border border-(--color-outline-variant)/30 rounded-xl font-label font-bold text-sm tracking-wider uppercase transition-all duration-300 ease-out hover:bg-(--color-surface-container-highest) hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-(--color-primary)/50"
-                  style={{ backgroundColor: dailyChallengeCompleted ? '#4caf50' : 'var(--color-surface-container-lowest)',color: dailyChallengeCompleted ? '#fff' : 'var(--color-primary)' }}
+                  style={{ backgroundColor: dailyChallengeCompleted ? '#4caf50' : 'var(--color-surface-container-lowest)', color: dailyChallengeCompleted ? '#fff' : 'var(--color-primary)' }}
                 >
                   {dailyChallengeCompleted ? <div className='flex items-center justify-center gap-2'><span className='material-symbols-outlined text-sm'>check_circle</span> Completed</div> : 'Start Daily Challenge'}
                 </button>
-                
+
                 {/* Streak Counter Card */}
-                <div className="relative w-full aspect-square rounded-3xl overflow-hidden mb-4 mt-4 bg-(--color-surface-container) group border border-(--color-outline-variant)/20"> 
+                <div className="relative w-full aspect-square rounded-3xl overflow-hidden mb-4 mt-4 bg-(--color-surface-container) group border border-(--color-outline-variant)/20">
                   <img
                     alt="Math abstract"
                     className="object-cover w-full h-full opacity-40 transition-transform duration-700 ease-out group-hover:scale-110"
@@ -1298,10 +1374,10 @@ function App() {
           </main>
 
           {/* ── Main and Footer divider ── */}
-          <AnimatedDivider marginClass="mt-8" />
+          {fullViewToggle ? null : <AnimatedDivider marginClass="mt-8" />}
 
           {/* ── Footer ── */}
-          {mobileNavEnabled ? <div className='mb-17'></div> : (<footer className=" w-full flex flex-col">
+          {isMobileOrTablet || mobileNavEnabled || fullViewToggle ? <div className='mb-17'></div> : (<footer className=" w-full flex flex-col">
             {/* Layers 1 and 2 container */}
             <div
               className={`w-full relative ${footerBgEnabled ? '' : 'bg-surface-container-low'}`}
@@ -1397,7 +1473,7 @@ function App() {
           </footer>)}
 
           {/* ── Mobile Navigation ── */}
-          {mobileNavEnabled && (
+          {(isMobileOrTablet || mobileNavEnabled) && (
             <nav className="md  fixed bottom-0 left-0 right-0 bg-surface-container-highest/90 backdrop-blur-md px-3 py-3 flex justify-around items-center z-50 rounded-t-[5px] shadow-[0_-20px_40px_rgba(25,28,30,0.06)]">
 
               <button onClick={() => setShowDaily(true)} className="flex flex-col items-center gap-1 text-primary">
@@ -1428,7 +1504,7 @@ function App() {
                 <span className="font-label text-[10px] font-bold uppercase tracking-wider">Stats</span>
               </button>
               <button
-                onClick={() => setShowSettings(true)}
+                onClick={() => { buttonClick(); setShowSettings(true); }}
                 className="flex flex-col items-center gap-1 text-on-surface-variant hover:text-primary transition-colors"
               >
                 <span className="material-symbols-outlined">settings</span>

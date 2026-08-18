@@ -144,7 +144,7 @@ export default function Settings({ theme, onThemeChange, mistakeLimitEnabled, on
                     Fork on GitHub
                   </p>
                   <p className="font-label text-xs text-on-surface-variant group-hover:text-white/60 transition-colors duration-300">
-                    Contribute to the codebase 🛠️
+                    Contribute to the codebase
                   </p>
                 </div>
                 <img

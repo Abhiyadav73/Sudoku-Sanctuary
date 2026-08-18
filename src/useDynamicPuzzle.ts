@@ -5,7 +5,7 @@ export type Difficulty = 'easy' | 'medium' | 'hard' | 'expert';
 export interface SudokuPuzzle {
   id: string;
   difficulty: Difficulty;
-  puzzle: string;   
+  puzzle: string;
   solution: string;
 }
 
@@ -32,9 +32,9 @@ export interface SerializedCell {
 
 // ─── JSON datasets (fallback only) ───────────────────────────────────────────
 
-import easyData   from '../easy.json';
+import easyData from '../easy.json';
 import mediumData from '../medium.json';
-import hardData   from '../hard.json';
+import hardData from '../hard.json';
 import expertData from '../expert.json';
 import { dbService } from './dbService';
 
@@ -42,9 +42,9 @@ const JSON_DATASETS: Record<
   Difficulty,
   { mode: string; puzzles: { id: string; board: string; solution: string }[] }
 > = {
-  easy:   easyData,
+  easy: easyData,
   medium: mediumData,
-  hard:   hardData,
+  hard: hardData,
   expert: expertData,
 };
 
@@ -54,10 +54,10 @@ const PROGRESS_KEY = (diff: Difficulty) => `sudoku-progress-${diff}`;
 const DAILY_KEY = 'sudoku-daily-challenge';
 
 // ─── Validator ────────────────────────────────────────────────────────────────
- 
+
 function validatePuzzle(board: string, solution: string): boolean {
   if (board.length !== 81 || solution.length !== 81) return false;
-  if (!/^[0-9]{81}$/.test(board))    return false;
+  if (!/^[0-9]{81}$/.test(board)) return false;
   if (!/^[1-9]{81}$/.test(solution)) return false;
 
   for (let i = 0; i < 9; i++) {
@@ -69,7 +69,7 @@ function validatePuzzle(board: string, solution: string): boolean {
       const c = solution[j * 9 + i];
       const br = Math.floor(i / 3) * 3 + Math.floor(j / 3);
       const bc = (i % 3) * 3 + (j % 3);
-      const b  = solution[br * 9 + bc];
+      const b = solution[br * 9 + bc];
       if (row.has(r) || col.has(c) || box.has(b)) return false;
       row.add(r); col.add(c); box.add(b);
     }
@@ -172,9 +172,9 @@ function removeNumbers(
     easy:   5,
     medium: 30,  
     hard:   40,
-    expert: 50,
+    expert: 45,
   };
-  let attempts = attemptsMap[difficulty];
+  let attempts = attemptsMap[difficulty]; 
   const puzzle = grid.map(row => [...row]);
 
   while (attempts > 0) {
@@ -194,25 +194,95 @@ function removeNumbers(
   return puzzle;
 }
 
+// ─── Counter / Statistics ───────────────────────────────────────────────────
+
+export type PuzzleDynamics = {
+  emptyCells: number;
+  numberCount: Record<number, number>;
+};
+
+export const getPuzzleStatistics = (
+  input:
+    | string
+    | (number | null)[]
+    | (number | null)[][]
+    | { value: number | null }[]
+    | { puzzle: string }
+    | null
+    | undefined
+): PuzzleDynamics => {
+  const numberCount: Record<number, number> = {
+    1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0,
+  };
+  let emptyCells = 0;
+
+  if (!input) {
+    return { emptyCells: 0, numberCount };
+  }
+
+  let str = '';
+
+  if (typeof input === 'string') {
+    str = input;
+  } else if (typeof input === 'object' && input !== null && 'puzzle' in input && typeof (input as { puzzle: string }).puzzle === 'string') {
+    str = (input as { puzzle: string }).puzzle;
+  } else if (Array.isArray(input)) {
+    const flat = (input as any[]).flat();
+    for (const item of flat) {
+      let val: number | null = null;
+      if (item === null || item === undefined) {
+        val = null;
+      } else if (typeof item === 'object' && item !== null && 'value' in item) {
+        val = (item as { value: number | null }).value;
+      } else if (typeof item === 'number') {
+        val = item;
+      } else if (typeof item === 'string') {
+        val = parseInt(item, 10);
+      }
+
+      if (val === null || isNaN(val) || val === 0) {
+        emptyCells++;
+      } else if (val >= 1 && val <= 9) {
+        numberCount[val]++;
+      }
+    }
+    return { emptyCells, numberCount };
+  }
+
+  if (str.length === 81) {
+    for (const char of str) {
+      const num = Number(char);
+      if (char === '0' || isNaN(num) || num === 0) {
+        emptyCells++;
+      } else if (num >= 1 && num <= 9) {
+        numberCount[num]++;
+      }
+    }
+  }
+
+  return { emptyCells, numberCount };
+};
+
 function generateDynamicPuzzle(
   difficulty: Difficulty,
   idPrefix = 'dyn',
   rng?: () => number,
 ): SudokuPuzzle | null {
-  const fullGrid   = generateFullGrid(rng);
-  const solution   = fullGrid.flat().join('');
+  const fullGrid = generateFullGrid(rng);
+  const solution = fullGrid.flat().join('');
   const puzzleGrid = removeNumbers(fullGrid, difficulty, rng);
-  const puzzle     = puzzleGrid.flat().join('');
+  const puzzle = puzzleGrid.flat().join('');
 
   if (!validatePuzzle(puzzle, solution)) return null; // should never happen
 
   return {
-    id:         `${idPrefix}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+    id: `${idPrefix}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
     difficulty,
     puzzle,
     solution,
   };
 }
+
 
 // ─── FALLBACK: JSON dataset loader ───────────────────────────────────────────
 
@@ -245,7 +315,7 @@ function getPuzzle(
   // ③ Last resort — generate without a seeded RNG (ignores prior failure)
   return generateDynamicPuzzle(difficulty, 'fallback') ??
     // Should be unreachable, but TS needs a return value
-    { id: 'err', difficulty, puzzle: '0'.repeat(81), solution: '123456789'.repeat(9) };
+    { id: 'err', difficulty, puzzle: '0'.repeat(81), solution: '123456789'.repeat(9), };
 }
 
 // ─── Seeded PRNG (daily challenge) ───────────────────────────────────────────
@@ -255,7 +325,7 @@ function seededRandom(seed: number): () => number {
   let s = seed;
   return () => {
     s |= 0;
-    s  = (s + 0x6D2B79F5) | 0;
+    s = (s + 0x6D2B79F5) | 0;
     let t = Math.imul(s ^ (s >>> 15), 1 | s);
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
@@ -293,19 +363,19 @@ function clearProgress(difficulty: Difficulty): void {
 
 // ─── Public API ───────────────────────────────────────────────────────────────
 export function startNewGame(difficulty: Difficulty): SudokuPuzzle {
-  const old    = loadProgress(difficulty);
+  const old = loadProgress(difficulty);
   const puzzle = getPuzzle(difficulty, 'dyn', old?.puzzleId);
 
   saveProgress({
-    puzzleId:      puzzle.id,
-    puzzle:        puzzle.puzzle,
-    solution:      puzzle.solution,
+    puzzleId: puzzle.id,
+    puzzle: puzzle.puzzle,
+    solution: puzzle.solution,
     difficulty,
     boardSnapshot: null,
-    timeElapsed:   0,
-    mistakeCount:  0,
-    history:       [],
-    savedAt:       Date.now(),
+    timeElapsed: 0,
+    mistakeCount: 0,
+    history: [],
+    savedAt: Date.now(),
   });
 
   return puzzle;
@@ -319,10 +389,10 @@ export function resumeOrStartGame(
   if (saved && validatePuzzle(saved.puzzle, saved.solution)) {
     return {
       puzzle: {
-        id:         saved.puzzleId,
+        id: saved.puzzleId,
         difficulty,
-        puzzle:     saved.puzzle,
-        solution:   saved.solution,
+        puzzle: saved.puzzle,
+        solution: saved.solution,
       },
       progress: saved,
     };
@@ -330,15 +400,15 @@ export function resumeOrStartGame(
 
   const puzzle = getPuzzle(difficulty, 'dyn', saved?.puzzleId);
   saveProgress({
-    puzzleId:      puzzle.id,
-    puzzle:        puzzle.puzzle,
-    solution:      puzzle.solution,
+    puzzleId: puzzle.id,
+    puzzle: puzzle.puzzle,
+    solution: puzzle.solution,
     difficulty,
     boardSnapshot: null,
-    timeElapsed:   0,
-    mistakeCount:  0,
-    history:       [],
-    savedAt:       Date.now(),
+    timeElapsed: 0,
+    mistakeCount: 0,
+    history: [],
+    savedAt: Date.now(),
   });
 
   return { puzzle, progress: null };
@@ -346,18 +416,18 @@ export function resumeOrStartGame(
 
 
 export function persistProgress(
-  difficulty:    Difficulty,
-  puzzleId:      string,
-  puzzleString:  string,
-  solution:      string,
+  difficulty: Difficulty,
+  puzzleId: string,
+  puzzleString: string,
+  solution: string,
   boardSnapshot: SerializedCell[],
-  timeElapsed:   number,
-  mistakeCount:  number,
-  history:       { board: SerializedCell[] }[],
+  timeElapsed: number,
+  mistakeCount: number,
+  history: { board: SerializedCell[] }[],
 ): void {
   saveProgress({
     puzzleId,
-    puzzle:   puzzleString,
+    puzzle: puzzleString,
     solution,
     difficulty,
     boardSnapshot,
@@ -375,10 +445,10 @@ export function clearGameProgress(difficulty: Difficulty): void {
 // ─── Daily Challenge ──────────────────────────────────────────────────────────
 
 interface DailyEntry {
-  date:       string;
-  puzzleId:   string;
-  puzzle:     string;
-  solution:   string;
+  date: string;
+  puzzleId: string;
+  puzzle: string;
+  solution: string;
   difficulty: Difficulty;
 }
 
@@ -394,18 +464,18 @@ export function getDailyChallenge(): SudokuPuzzle {
       const entry: DailyEntry = JSON.parse(raw);
       if (entry.date === today && validatePuzzle(entry.puzzle, entry.solution)) {
         return {
-          id:         entry.puzzleId,
+          id: entry.puzzleId,
           difficulty: entry.difficulty,
-          puzzle:     entry.puzzle,
-          solution:   entry.solution,
+          puzzle: entry.puzzle,
+          solution: entry.solution,
         };
       }
     }
   } catch { /* ignore */ }
 
   // Generate a fresh daily puzzle with a seeded RNG (deterministic for this date)
-  const rng        = seededRandom(todaySeed());
-  const diffIndex  = Math.floor(rng() * DIFFICULTIES.length);
+  const rng = seededRandom(todaySeed());
+  const diffIndex = Math.floor(rng() * DIFFICULTIES.length);
   const difficulty = DIFFICULTIES[diffIndex];
 
   // Use the seeded RNG so the same puzzle is produced for this date everywhere
@@ -413,10 +483,10 @@ export function getDailyChallenge(): SudokuPuzzle {
 
   try {
     const entry: DailyEntry = {
-      date:       today,
-      puzzleId:   chosen.id,
-      puzzle:     chosen.puzzle,
-      solution:   chosen.solution,
+      date: today,
+      puzzleId: chosen.id,
+      puzzle: chosen.puzzle,
+      solution: chosen.solution,
       difficulty: chosen.difficulty,
     };
     localStorage.setItem(DAILY_KEY, JSON.stringify(entry));

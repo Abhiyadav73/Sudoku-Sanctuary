@@ -283,6 +283,14 @@ export default function HowToPlay({ onClose, onShowLeaderboard, onShowStats, onS
                 <h4 className="font-headline text-xl font-bold mb-3 text-on-surface">Reset</h4>
                 <p className="text-sm text-on-surface-variant leading-relaxed max-w-lg">Clear the board and start fresh current game.</p>
               </div>
+              {/* control card: Adjust View */}
+              <div className="bg-surface-container-low p-8 rounded-4xl hover:bg-surface-container-high transition-colors duration-300">
+                <div className="w-12 h-12 rounded-2xl bg-error text-on-error flex items-center justify-center mb-6 shadow-[0_8px_16px_rgba(239,83,80,0.25)]">
+                  <span className="material-symbols-outlined">fullscreen</span>
+                </div>
+                <h4 className="font-headline text-xl font-bold mb-3 text-on-surface">Adjust View (Beta)</h4>
+                <p className="text-sm text-on-surface-variant leading-relaxed max-w-lg">Toggle between full screen and normal mode to get a better view of the board.</p>
+              </div>
             </div> 
           </section>
 

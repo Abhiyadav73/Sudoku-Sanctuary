@@ -81,16 +81,16 @@ export default function StreakCard({
                         className="w-full h-full object-contain scale-110"
                     />
                     {/* Text heavily shadow-dropped to maintain maximum readability against moving fire */}
-                    <span className="absolute inset-0 flex items-center justify-center font-headline font-black text-3xl text-(--color-on-surface) drop-shadow-[0_4px_6px_rgba(0,0,0,0.7)] pt-4">
+                    <span className="absolute inset-0 flex items-center justify-center font-headline font-black text-3xl text-white drop-shadow-[0_4px_6px_rgba(0,0,0,0.7)] pt-4">
                         {currentStreak}
                     </span>
                 </div>
 
-                <span className="text-xs text-(--color-on-surface-variant) font-semibold uppercase tracking-widest opacity-90">
+                <span className="text-xs text-white font-semibold uppercase tracking-widest opacity-90">
                     {currentStreak} Days Active
                 </span>
 
-                <p className="text-sm font-medium text-(--color-on-surface) mt-2 px-4 italic">
+                <p className="text-sm font-medium text-white mt-2 px-4 italic">
                     "{streakMessage}"
                 </p>
 

@@ -458,7 +458,7 @@ export function useSudoku() {
     state.board.every(cell => cell.value !== null) &&
     state.board.every(cell => !cell.error);
 
-  const peerIndices: Set<number> =
+   const peerIndices: Set<number> =
     state.selectedCell !== null ? allPeers(state.selectedCell) : new Set();
 
   return {

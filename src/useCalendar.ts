@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { dbService} from './dbService';
 import type { DatePayload } from './dbService';
 
-export type ThemeMode = 'light' | 'dark' | 'minimal-blue';
+export type ThemeMode = 'light' | 'dark' | 'minimal-blue' | 'minimal-violet';
 
 export interface CalendarDay {
   date: Date;
